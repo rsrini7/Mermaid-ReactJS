@@ -117,7 +117,7 @@ const App = () => {
     dateFormat  YYYY-MM-DD
     section Section
     A task           :a1, 2024-01-01, 30d
-    Another task     :after a1, 20d
+    Another task     :after a1, 2d
     section Another
     Task in sec      :2024-01-12, 12d
     another task     :24d`,
@@ -219,7 +219,44 @@ const App = () => {
       theme: theme === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
-    renderDiagram();
+    
+    // Only render on theme change if we already have a diagram rendered
+    if (outputDivRef.current && outputDivRef.current.innerHTML) {
+      renderDiagram();
+    }
+  }, [theme]);
+
+  // Separate useEffect for initial render
+  useEffect(() => {
+    // Initialize mermaid with the current theme
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: theme === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Render the diagram after a short delay to ensure initialization is complete
+    const timer = setTimeout(() => {
+      renderDiagram();
+    }, 100);
+    
+    // Clean up the timer if the component unmounts
+    return () => clearTimeout(timer);
+  }, []); // Empty dependency array means this runs once on mount
+  
+  // Separate useEffect just for theme changes
+  useEffect(() => {
+    // Re-initialize mermaid when theme changes
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: theme === 'dark' ? 'dark' : 'default',
+      securityLevel: 'loose'
+    });
+    
+    // Only re-render if we're not in the initial render
+    if (outputDivRef.current && outputDivRef.current.querySelector('svg')) {
+      renderDiagram();
+    }
   }, [theme]);
 
   const handleThemeToggle = () => {
@@ -229,17 +266,34 @@ const App = () => {
   const handleTemplateChange = (e) => {
     const selectedTemplate = e.target.value;
     if (selectedTemplate && templates[selectedTemplate]) {
-      setMermaidCode(templates[selectedTemplate]);
+      // Clear the current diagram immediately
+      if (outputDivRef.current) {
+        outputDivRef.current.innerHTML = '';
+      }
+      
+      // Get the template code directly
+      const templateCode = templates[selectedTemplate];
+      
+      // Update state
+      setMermaidCode(templateCode);
+      
+      // Render using the template code directly instead of waiting for state update
+      setTimeout(() => {
+        renderDiagramWithCode(templateCode);
+      }, 50);
     }
   };
 
-  const renderDiagram = () => {
+  // Add a new function that takes code as a parameter
+  const renderDiagramWithCode = (code) => {
     setLoading(true);
     setErrorMessage('');
 
     try {
-      mermaid.render('mermaid-svg', mermaidCode).then(result => {
-        outputDivRef.current.innerHTML = result.svg;
+      mermaid.render('mermaid-svg', code).then(result => {
+        if (outputDivRef.current) {
+          outputDivRef.current.innerHTML = result.svg;
+        }
         setLoading(false);
       }).catch(error => {
         setErrorMessage(`Error: ${error.message || 'Invalid Mermaid syntax'}`);
@@ -249,6 +303,10 @@ const App = () => {
       setErrorMessage(`Error: ${error.message || 'Invalid Mermaid syntax'}`);
       setLoading(false);
     }
+  };
+
+  const renderDiagram = () => {
+    renderDiagramWithCode(mermaidCode);
   };
 
   const exportSvg = () => {
