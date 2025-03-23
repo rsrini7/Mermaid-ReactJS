@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
+import './App.css';
 
 const App = () => {
   const [theme, setTheme] = useState('light');
@@ -446,15 +447,15 @@ const App = () => {
   };
 
   return (
-    <div data-theme={theme} style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', color: theme === 'dark' ? '#e0e0e0' : '#333333', backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff', transition: 'background-color 0.3s, color 0.3s' }}>
+    <div className="app-container" data-theme={theme}>
       <h1>Mermaid Diagram Generator</h1>
 
       <div className="template-section">
         <label htmlFor="template-select">Select Template: </label>
-        <select id="template-select" onChange={handleTemplateChange}>
+        <select id="template-select" onChange={handleTemplateChange} defaultValue="flowchart">
           <option value="">-- Select a diagram type --</option>
           <optgroup label="Flow Charts">
-            <option value="flowchart" selected>Flowchart (TD - Top Down)</option>
+            <option value="flowchart">Flowchart (TD - Top Down)</option>
             <option value="flowchart-lr">Flowchart (LR - Left to Right)</option>
             <option value="flowchart-complex">Complex Flowchart with Subgraphs</option>
           </optgroup>
@@ -501,7 +502,7 @@ const App = () => {
         </select>
       </div>
 
-      <div className="controls" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '15px' }}>
+      <div className="controls">
         <div className="theme-toggle">
           <span className="theme-icon">☀️</span>
           <label className="switch">
@@ -512,29 +513,29 @@ const App = () => {
         </div>
       </div>
 
-      <div className="container" style={{ display: 'flex', flexDirection: 'row', gap: '20px' }}>
-        <div className="input-section" style={{ flex: '1', maxWidth: '50%' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="container">
+        <div className="input-section">
+          <div className="input-header">
             <h2>Mermaid Syntax</h2>
             <div>
-              <button onClick={renderDiagram} style={{ marginRight: '10px' }}>Render Diagram</button>
+              <button onClick={renderDiagram}>Render Diagram</button>
               <button onClick={handleOpenPopup}>Open Editor</button>
             </div>
           </div>
           <textarea
+            className="mermaid-textarea"
             value={mermaidCode}
             onChange={(e) => setMermaidCode(e.target.value)}
             placeholder="Enter your Mermaid diagram syntax here..."
-            style={{ width: '100%', height: '300px', padding: '10px', fontFamily: 'monospace', border: '1px solid #dddddd', borderRadius: '5px', resize: 'vertical', boxSizing: 'border-box', backgroundColor: theme === 'dark' ? '#2d2d2d' : '#ffffff', color: theme === 'dark' ? '#e0e0e0' : '#333333' }}
           />
           <div>
             {loading && <span className="loading">Rendering...</span>}
-            <div id="error-message" style={{ color: '#e74c3c', marginTop: '10px' }}>{errorMessage}</div>
+            <div className="error-message">{errorMessage}</div>
           </div>
 
-          <div id="resolution-settings" style={{ marginTop: '15px', padding: '10px', border: '1px solid #dddddd', borderRadius: '5px' }}>
+          <div className="resolution-settings">
             <h3>Export Settings</h3>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <div className="settings-inputs">
               <div>
                 <label htmlFor="image-width">Width: </label>
                 <input type="number" id="image-width" value={imageWidth} onChange={(e) => setImageWidth(parseInt(e.target.value, 10))} min="100" />
@@ -551,27 +552,27 @@ const App = () => {
           </div>
         </div>
 
-        <div className="output-section" style={{ flex: '1', maxWidth: '50%' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="output-section">
+          <div className="output-header">
             <h2>Rendered Diagram</h2>
             <div>
-              <button onClick={exportSvg} style={{ marginRight: '5px' }}>Export as SVG</button>
-              <button onClick={exportPng} style={{ marginRight: '5px' }}>Export as PNG</button>
+              <button onClick={exportSvg}>Export as SVG</button>
+              <button onClick={exportPng}>Export as PNG</button>
               <button onClick={openDiagramWindow}>Open Diagram</button>
             </div>
           </div>
-          <div id="mermaid-output" ref={outputDivRef} style={{ border: '1px solid #dddddd', borderRadius: '5px', padding: '10px', minHeight: '300px', backgroundColor: theme === 'dark' ? '#2d2d2d' : '#f9f9f9' }}></div>
+          <div className="mermaid-output" ref={outputDivRef}></div>
         </div>
       </div>
 
       {isPopupOpen && (
-        <div className="popup" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div className="popup-content" style={{ backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff', padding: '20px', borderRadius: '5px', width: '80%', height: '90%', maxWidth: '1200px', maxHeight: '100vh', overflowY: 'auto', color: theme === 'dark' ? '#e0e0e0' : '#333333', border: '1px solid #dddddd' }}>
+        <div className="popup">
+          <div className="popup-content">
             <h2>Edit Mermaid Syntax</h2>
             <textarea
+              className="popup-textarea"
               value={mermaidCode}
               onChange={(e) => setMermaidCode(e.target.value)}
-              style={{ width: '100%', height: '500px', marginBottom: '15px', fontFamily: 'monospace', border: '1px solid #dddddd', borderRadius: '5px', resize: 'vertical', boxSizing: 'border-box', backgroundColor: theme === 'dark' ? '#2d2d2d' : '#ffffff', color: theme === 'dark' ? '#e0e0e0' : '#333333' }}
             />
             <div>
               <button onClick={handleSavePopup}>Save and Close</button>
@@ -582,15 +583,15 @@ const App = () => {
       )}
 
       {isDiagramPopupOpen && (
-        <div className="popup" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.7)', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div className="popup-content" style={{ backgroundColor: theme === 'dark' ? '#1e1e1e' : '#ffffff', padding: '20px', borderRadius: '5px', width: '80%', height: '90%', maxWidth: '1200px', maxHeight: '100vh', overflowY: 'auto', color: theme === 'dark' ? '#e0e0e0' : '#333333', border: '1px solid #dddddd' }}>
+        <div className="popup">
+          <div className="popup-content">
             <h2>Diagram Preview</h2>
             <div className="diagram-controls">
               <button onClick={handleZoomIn}>Zoom In</button>
               <button onClick={handleZoomOut}>Zoom Out</button>
               <button onClick={() => setIsDiagramPopupOpen(false)}>Close</button>
             </div>
-            <div id="diagram-preview" ref={diagramPreviewRef} style={{ overflow: 'auto', maxHeight: '90vh', maxWidth: '100%', width: '100%', height: '70%', border: '1px solid #dddddd', padding: '15px', backgroundColor: theme === 'dark' ? '#2d2d2d' : '#f9f9f9', borderRadius: '5px' }}></div>
+            <div className="diagram-preview" ref={diagramPreviewRef}></div>
           </div>
         </div>
       )}
