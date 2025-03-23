@@ -42,8 +42,24 @@ body[data-theme="light"] {
 /* Controls */
 .controls {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 15px;
+}
+
+/* Template section */
+.template-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.template-section label {
+  margin-right: 10px;
+}
+
+.template-section select {
+  flex-grow: 1;
 }
 
 .theme-toggle {
@@ -181,6 +197,14 @@ input:checked + .slider:before {
   border-radius: 5px;
   padding: 10px;
   min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mermaid-output svg {
+  max-width: 100%;
+  height: auto;
 }
 
 .app-container[data-theme="dark"] .mermaid-output {
@@ -259,11 +283,27 @@ input:checked + .slider:before {
   overflow: auto;
   max-height: 90vh;
   max-width: 100%;
-  width: 100%;
+  width: 97%;
   height: 70%;
   border: 1px solid #dddddd;
   padding: 15px;
   border-radius: 5px;
+  display: block;
+  text-align: center;
+}
+
+.diagram-container {
+  display: inline-block;
+  margin: 0 auto;
+  transform-origin: center top;
+  min-width: 70%;
+  min-height: 70%;
+}
+
+.diagram-container svg {
+  max-width: 100%;
+  min-width: 300px;
+  height: auto;
 }
 
 .app-container[data-theme="dark"] .diagram-preview {
