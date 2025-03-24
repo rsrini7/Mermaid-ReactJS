@@ -18,9 +18,9 @@ const App = () => {
   const [diagramScale, setDiagramScale] = useState(1);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isDiagramPopupOpen, setIsDiagramPopupOpen] = useState(false);
-  const [imageWidth, setImageWidth] = useState(1200);
-  const [imageHeight, setImageHeight] = useState(800);
-  const [imageScale, setImageScale] = useState(2);
+  const [imageWidth, setImageWidth] = useState(1100);
+  const [imageHeight, setImageHeight] = useState(1000);
+  const [imageScale, setImageScale] = useState(1);
 
   const outputDivRef = useRef(null);
   const diagramPreviewRef = useRef(null);
