@@ -255,8 +255,10 @@ input:checked + .slider:before {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  outline: none; /* Remove outline when focused */
 }
 
+/* Popup styles */
 .popup-content {
   padding: 20px;
   border-radius: 5px;
@@ -266,6 +268,56 @@ input:checked + .slider:before {
   max-height: 100vh;
   overflow-y: auto;
   border: 1px solid #dddddd;
+  display: flex;
+  flex-direction: column;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  position: sticky;
+  top: 0;
+  background-color: inherit;
+  z-index: 10;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dddddd;
+}
+
+.popup-header h2 {
+  margin: 0;
+}
+
+.popup-header-buttons {
+  display: flex;
+}
+
+.popup-header-buttons button {
+  margin-left: 5px;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: flex-end;
+  position: sticky;
+  bottom: 0;
+  background-color: inherit;
+  padding-top: 10px;
+  border-top: 1px solid #dddddd;
+  margin-top: 10px;
+}
+
+.popup-textarea {
+  width: 100%;
+  height: 500px;
+  margin-bottom: 15px;
+  font-family: monospace;
+  border: 1px solid #dddddd;
+  border-radius: 5px;
+  resize: vertical;
+  box-sizing: border-box;
+  flex: 1;
 }
 
 .app-container[data-theme="dark"] .popup-content {
@@ -299,12 +351,47 @@ input:checked + .slider:before {
   color: #333333;
 }
 
+/* Diagram controls */
 .diagram-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 10px;
+  position: sticky;
+  top: 0;
+  background-color: inherit;
+  z-index: 10;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dddddd;
 }
 
-.diagram-controls button {
-  margin-right: 5px;
+.diagram-controls h2 {
+  margin: 0;
+}
+
+.diagram-control-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.diagram-control-buttons button {
+  margin-left: 5px;
+}
+
+/* Icon buttons */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 18px;
+}
+
+.icon-button:hover {
+  background-color: #3a8a3c;
 }
 
 .diagram-preview {

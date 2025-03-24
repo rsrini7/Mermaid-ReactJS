@@ -446,6 +446,27 @@ const App = () => {
     setIsPopupOpen(false);
   };
 
+  // Add this useEffect to handle escape key press
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        if (isPopupOpen) {
+          handleClosePopup();
+        }
+        if (isDiagramPopupOpen) {
+          setIsDiagramPopupOpen(false);
+        }
+      }
+    };
+  
+    document.addEventListener('keydown', handleKeyDown);
+  
+    // Clean up the event listener when component unmounts
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isPopupOpen, isDiagramPopupOpen]); // Dependencies array
+
   return (
     <div className="app-container" data-theme={theme}>
       <h1>Mermaid Diagram Generator</h1>
@@ -568,16 +589,18 @@ const App = () => {
       {isPopupOpen && (
         <div className="popup">
           <div className="popup-content">
-            <h2>Edit Mermaid Syntax</h2>
+            <div className="popup-header">
+              <h2>Edit Mermaid Syntax</h2>
+              <div className="popup-header-buttons">
+                <button onClick={handleSavePopup}>Save and Close</button>
+                <button onClick={handleClosePopup}>Close Without Saving</button>
+              </div>
+            </div>
             <textarea
               className="popup-textarea"
               value={mermaidCode}
               onChange={(e) => setMermaidCode(e.target.value)}
             />
-            <div>
-              <button onClick={handleSavePopup}>Save and Close</button>
-              <button onClick={handleClosePopup}>Close Without Saving</button>
-            </div>
           </div>
         </div>
       )}
@@ -585,11 +608,13 @@ const App = () => {
       {isDiagramPopupOpen && (
         <div className="popup">
           <div className="popup-content">
-            <h2>Diagram Preview</h2>
             <div className="diagram-controls">
-              <button onClick={handleZoomIn}>Zoom In</button>
-              <button onClick={handleZoomOut}>Zoom Out</button>
-              <button onClick={() => setIsDiagramPopupOpen(false)}>Close</button>
+              <h2>Diagram Preview</h2>
+              <div className="diagram-control-buttons">
+                <button className="icon-button" onClick={handleZoomIn} title="Zoom In">+</button>
+                <button className="icon-button" onClick={handleZoomOut} title="Zoom Out">−</button>
+                <button onClick={() => setIsDiagramPopupOpen(false)}>Close</button>
+              </div>
             </div>
             <div className="diagram-preview" ref={diagramPreviewRef}></div>
           </div>
