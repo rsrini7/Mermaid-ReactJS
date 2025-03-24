@@ -611,9 +611,18 @@ const App = () => {
             <div className="diagram-controls">
               <h2>Diagram Preview</h2>
               <div className="diagram-control-buttons">
-                <button className="icon-button" onClick={handleZoomIn} title="Zoom In">+</button>
-                <button className="icon-button" onClick={handleZoomOut} title="Zoom Out">−</button>
-                <button onClick={() => setIsDiagramPopupOpen(false)}>Close</button>
+                <div className="tooltip-wrapper">
+                  <button className="icon-button" onClick={handleZoomIn}>+</button>
+                  <span className="tooltip-text">Zoom In</span>
+                </div>
+                <div className="tooltip-wrapper">
+                  <button className="icon-button" onClick={handleZoomOut}>−</button>
+                  <span className="tooltip-text">Zoom Out</span>
+                </div>
+                <div className="tooltip-wrapper">
+                  <button onClick={() => setIsDiagramPopupOpen(false)}>Close</button>
+                  <span className="tooltip-text">Close Preview</span>
+                </div>
               </div>
             </div>
             <div className="diagram-preview" ref={diagramPreviewRef}></div>
