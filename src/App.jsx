@@ -3,6 +3,13 @@ import mermaid from 'mermaid';
 import './App.css';
 import templates from './utils/mermaidTemplates.js';
 
+// Import components
+import Header from './components/Header';
+import InputSection from './components/InputSection';
+import OutputSection from './components/OutputSection';
+import EditorPopup from './components/EditorPopup';
+import DiagramPopup from './components/DiagramPopup';
+
 const App = () => {
   const [theme, setTheme] = useState('light');
   const [mermaidCode, setMermaidCode] = useState(templates.flowchart);
@@ -18,6 +25,7 @@ const App = () => {
   const outputDivRef = useRef(null);
   const diagramPreviewRef = useRef(null);
 
+  // Initialize mermaid and handle theme changes
   useEffect(() => {
     mermaid.initialize({
       startOnLoad: false,
@@ -31,38 +39,20 @@ const App = () => {
     }
   }, [theme]);
 
-  // Separate useEffect for initial render
+  // Initial render
   useEffect(() => {
-    // Initialize mermaid with the current theme
     mermaid.initialize({
       startOnLoad: false,
       theme: theme === 'dark' ? 'dark' : 'default',
       securityLevel: 'loose'
     });
     
-    // Render the diagram after a short delay to ensure initialization is complete
     const timer = setTimeout(() => {
       renderDiagram();
     }, 100);
     
-    // Clean up the timer if the component unmounts
     return () => clearTimeout(timer);
-  }, []); // Empty dependency array means this runs once on mount
-  
-  // Separate useEffect just for theme changes
-  useEffect(() => {
-    // Re-initialize mermaid when theme changes
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: theme === 'dark' ? 'dark' : 'default',
-      securityLevel: 'loose'
-    });
-    
-    // Only re-render if we're not in the initial render
-    if (outputDivRef.current && outputDivRef.current.querySelector('svg')) {
-      renderDiagram();
-    }
-  }, [theme]);
+  }, []);
 
   const handleThemeToggle = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
@@ -71,25 +61,19 @@ const App = () => {
   const handleTemplateChange = (e) => {
     const selectedTemplate = e.target.value;
     if (selectedTemplate && templates[selectedTemplate]) {
-      // Clear the current diagram immediately
       if (outputDivRef.current) {
         outputDivRef.current.innerHTML = '';
       }
       
-      // Get the template code directly
       const templateCode = templates[selectedTemplate];
-      
-      // Update state
       setMermaidCode(templateCode);
       
-      // Render using the template code directly instead of waiting for state update
       setTimeout(() => {
         renderDiagramWithCode(templateCode);
       }, 50);
     }
   };
 
-  // Add a new function that takes code as a parameter
   const renderDiagramWithCode = (code) => {
     setLoading(true);
     setErrorMessage('');
@@ -207,10 +191,8 @@ const App = () => {
   };
 
   const openDiagramWindow = () => {
-    // First set the popup to open, which will render the ref element
     setIsDiagramPopupOpen(true);
     
-    // Use setTimeout to ensure the ref is available after the component has rendered
     setTimeout(() => {
       if (diagramPreviewRef.current) {
         const currentDiagram = outputDivRef.current.innerHTML;
@@ -250,7 +232,11 @@ const App = () => {
     setIsPopupOpen(false);
   };
 
-  // Add this useEffect to handle escape key press
+  const closeDiagramPopup = () => {
+    setIsDiagramPopupOpen(false);
+  };
+
+  // Handle escape key press
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -258,180 +244,65 @@ const App = () => {
           handleClosePopup();
         }
         if (isDiagramPopupOpen) {
-          setIsDiagramPopupOpen(false);
+          closeDiagramPopup();
         }
       }
     };
   
     document.addEventListener('keydown', handleKeyDown);
-  
-    // Clean up the event listener when component unmounts
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isPopupOpen, isDiagramPopupOpen]); // Dependencies array
+  }, [isPopupOpen, isDiagramPopupOpen]);
 
   return (
     <div className="app-container" data-theme={theme}>
-      <h1>Mermaid Diagram Generator</h1>
-
-      <div className="controls">
-        <div className="template-section">
-          <label htmlFor="template-select">Select Template: </label>
-          <select id="template-select" name="template-select" onChange={handleTemplateChange} defaultValue="flowchart">
-            <option value="">-- Select a diagram type --</option>
-            <optgroup label="Flow Charts">
-              <option value="flowchart">Flowchart (TD - Top Down)</option>
-              <option value="flowchart-lr">Flowchart (LR - Left to Right)</option>
-              <option value="flowchart-complex">Complex Flowchart with Subgraphs</option>
-            </optgroup>
-            <optgroup label="Sequence Diagrams">
-              <option value="sequence">Basic Sequence Diagram</option>
-              <option value="sequence-advanced">Advanced Sequence Diagram</option>
-            </optgroup>
-            <optgroup label="Class Diagrams">
-              <option value="class">Class Diagram</option>
-            </optgroup>
-            <optgroup label="State Diagrams">
-              <option value="state">State Diagram</option>
-            </optgroup>
-            <optgroup label="Entity Relationship">
-              <option value="er">Entity Relationship Diagram</option>
-            </optgroup>
-            <optgroup label="User Journey">
-              <option value="journey">User Journey</option>
-            </optgroup>
-            <optgroup label="Gantt Charts">
-              <option value="gantt">Gantt Chart</option>
-            </optgroup>
-            <optgroup label="Pie Charts">
-              <option value="pie">Pie Chart</option>
-            </optgroup>
-            <optgroup label="Requirement Diagrams">
-              <option value="requirement">Requirement Diagram</option>
-            </optgroup>
-            <optgroup label="Git Graphs">
-              <option value="git">Git Graph</option>
-            </optgroup>
-            <optgroup label="C4 Diagrams">
-              <option value="c4">C4 Context Diagram</option>
-            </optgroup>
-            <optgroup label="Mind Maps">
-              <option value="mindmap">Mind Map</option>
-            </optgroup>
-            <optgroup label="Timeline">
-              <option value="timeline">Timeline</option>
-            </optgroup>
-            <optgroup label="Quadrant Charts">
-              <option value="quadrant">Quadrant Chart</option>
-            </optgroup>
-          </select>
-        </div>
-        
-        <div className="theme-toggle">
-          <span className="theme-icon">☀️</span>
-          <label className="switch">
-            <input type="checkbox" checked={theme === 'dark'} onChange={handleThemeToggle} />
-            <span className="slider"></span>
-          </label>
-          <span className="theme-icon">🌙</span>
-        </div>
-      </div>
+      <Header 
+        theme={theme} 
+        handleThemeToggle={handleThemeToggle} 
+        handleTemplateChange={handleTemplateChange} 
+      />
 
       <div className="container">
-        <div className="input-section">
-          <div className="input-header">
-            <h2>Mermaid Syntax</h2>
-            <div>
-              <button onClick={renderDiagram}>Render Diagram</button>
-              <button onClick={handleOpenPopup}>Open Editor</button>
-            </div>
-          </div>
-          <textarea
-            className="mermaid-textarea"
-            value={mermaidCode}
-            onChange={(e) => setMermaidCode(e.target.value)}
-            placeholder="Enter your Mermaid diagram syntax here..."
-          />
-          <div>
-            {loading && <span className="loading">Rendering...</span>}
-            <div className="error-message">{errorMessage}</div>
-          </div>
+        <InputSection 
+          mermaidCode={mermaidCode}
+          setMermaidCode={setMermaidCode}
+          renderDiagram={renderDiagram}
+          handleOpenPopup={handleOpenPopup}
+          loading={loading}
+          errorMessage={errorMessage}
+          imageWidth={imageWidth}
+          setImageWidth={setImageWidth}
+          imageHeight={imageHeight}
+          setImageHeight={setImageHeight}
+          imageScale={imageScale}
+          setImageScale={setImageScale}
+        />
 
-          <div className="resolution-settings">
-            <h3>Export Settings</h3>
-            <div className="settings-inputs">
-              <div>
-                <label htmlFor="image-width">Width: </label>
-                <input type="number" id="image-width" value={imageWidth} onChange={(e) => setImageWidth(parseInt(e.target.value, 10))} min="100" />
-              </div>
-              <div>
-                <label htmlFor="image-height">Height: </label>
-                <input type="number" id="image-height" value={imageHeight} onChange={(e) => setImageHeight(parseInt(e.target.value, 10))} min="100" />
-              </div>
-              <div>
-                <label htmlFor="image-scale">Scale: </label>
-                <input type="number" id="image-scale" value={imageScale} onChange={(e) => setImageScale(parseFloat(e.target.value))} min="1" max="5" step="0.5" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="output-section">
-          <div className="output-header">
-            <h2>Rendered Diagram</h2>
-            <div>
-              <button onClick={exportSvg}>Export as SVG</button>
-              <button onClick={exportPng}>Export as PNG</button>
-              <button onClick={openDiagramWindow}>Open Diagram</button>
-            </div>
-          </div>
-          <div className="mermaid-output" ref={outputDivRef}></div>
-        </div>
+        <OutputSection 
+          outputDivRef={outputDivRef}
+          exportSvg={exportSvg}
+          exportPng={exportPng}
+          openDiagramWindow={openDiagramWindow}
+        />
       </div>
 
       {isPopupOpen && (
-        <div className="popup editor-popup">
-          <div className="popup-content">
-            <div className="popup-header">
-              <h2>Edit Mermaid Syntax</h2>
-              <div className="popup-header-buttons">
-                <button onClick={handleSavePopup}>Save and Close</button>
-                <button onClick={handleClosePopup}>Close Without Saving</button>
-              </div>
-            </div>
-            <textarea
-              className="popup-textarea"
-              value={mermaidCode}
-              onChange={(e) => setMermaidCode(e.target.value)}
-            />
-          </div>
-        </div>
+        <EditorPopup 
+          mermaidCode={mermaidCode}
+          setMermaidCode={setMermaidCode}
+          handleSavePopup={handleSavePopup}
+          handleClosePopup={handleClosePopup}
+        />
       )}
 
       {isDiagramPopupOpen && (
-        <div className="popup diagram-popup">
-          <div className="popup-content">
-            <div className="diagram-controls">
-              <h2>Diagram Preview</h2>
-              <div className="diagram-control-buttons">
-                <div className="tooltip-wrapper">
-                  <button className="icon-button" onClick={handleZoomIn}>+</button>
-                  <span className="tooltip-text">Zoom In</span>
-                </div>
-                <div className="tooltip-wrapper">
-                  <button className="icon-button" onClick={handleZoomOut}>−</button>
-                  <span className="tooltip-text">Zoom Out</span>
-                </div>
-                <div className="tooltip-wrapper">
-                  <button onClick={() => setIsDiagramPopupOpen(false)}>Close</button>
-                  <span className="tooltip-text">Close Preview</span>
-                </div>
-              </div>
-            </div>
-            <div className="diagram-preview" ref={diagramPreviewRef}></div>
-          </div>
-        </div>
+        <DiagramPopup 
+          diagramPreviewRef={diagramPreviewRef}
+          handleZoomIn={handleZoomIn}
+          handleZoomOut={handleZoomOut}
+          closeDiagramPopup={closeDiagramPopup}
+        />
       )}
     </div>
   );
