@@ -587,7 +587,7 @@ const App = () => {
       </div>
 
       {isPopupOpen && (
-        <div className="popup">
+        <div className="popup editor-popup">
           <div className="popup-content">
             <div className="popup-header">
               <h2>Edit Mermaid Syntax</h2>
@@ -606,7 +606,7 @@ const App = () => {
       )}
 
       {isDiagramPopupOpen && (
-        <div className="popup">
+        <div className="popup diagram-popup">
           <div className="popup-content">
             <div className="diagram-controls">
               <h2>Diagram Preview</h2>

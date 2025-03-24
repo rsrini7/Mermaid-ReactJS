@@ -258,7 +258,43 @@ input:checked + .slider:before {
   outline: none; /* Remove outline when focused */
 }
 
-/* Popup styles */
+/* Specific styles for diagram popup */
+.diagram-popup .popup-content {
+  overflow-x: hidden;
+}
+
+.diagram-popup .diagram-preview {
+  overflow: auto;
+  max-height: 90vh;
+  width: 100%;
+  height: 90%;
+  border: 1px solid #dddddd;
+  padding: 15px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+.diagram-popup .diagram-container {
+  overflow-x: auto;
+  display: inline-block;
+  margin: 0;
+  transform-origin: left top;
+  max-width: 100%;
+  width: auto;
+  padding-bottom: 50px;
+  padding-right: 50px;
+}
+
+.diagram-popup .diagram-container svg {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  min-width: auto;
+}
+
 .popup-content {
   padding: 10px;
   border-radius: 5px;
@@ -389,7 +425,7 @@ input:checked + .slider:before {
   max-height: 90vh;
   max-width: 100%;
   width: 97%;
-  height: 70%;
+  height: 90%;
   border: 1px solid #dddddd;
   padding: 15px;
   border-radius: 5px;
