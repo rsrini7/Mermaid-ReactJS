@@ -1,6 +1,7 @@
 /* Main container styles */
 .app-container {
   width: calc(100% - 40px);
+  height: 100vh;
   margin: 0 20px;
   padding: 20px;
   transition: background-color 0.3s, color 0.3s;
@@ -12,6 +13,33 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  width: 100%;
+  margin: 0;
+  padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 body[data-theme="dark"] {
@@ -353,4 +381,14 @@ input[type="number"] {
   background-color: #2d2d2d;
   color: #e0e0e0;
   border-color: #444;
+}
+
+
+/* Hide third-party footers */
+.mermaid-footer,
+svg + div,
+.mermaid + div,
+[id^="mermaid"] + div,
+footer {
+  display: none !important;
 }
