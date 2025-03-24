@@ -1,4 +1,12 @@
 import React from 'react';
+import { 
+  FlexLayout, 
+  FlexItem, 
+  Text, 
+  H3, 
+  Input, 
+  FormField 
+} from '@salt-ds/core';
 
 const ExportSettings = ({ 
   imageWidth,
@@ -10,41 +18,41 @@ const ExportSettings = ({
 }) => {
   return (
     <div className="resolution-settings">
-      <h3>Export Settings</h3>
-      <div className="settings-inputs">
-        <div>
-          <label htmlFor="image-width">Width: </label>
-          <input 
-            type="number" 
-            id="image-width" 
-            value={imageWidth} 
-            onChange={(e) => setImageWidth(parseInt(e.target.value, 10))} 
-            min="100" 
-          />
-        </div>
-        <div>
-          <label htmlFor="image-height">Height: </label>
-          <input 
-            type="number" 
-            id="image-height" 
-            value={imageHeight} 
-            onChange={(e) => setImageHeight(parseInt(e.target.value, 10))} 
-            min="100" 
-          />
-        </div>
-        <div>
-          <label htmlFor="image-scale">Scale: </label>
-          <input 
-            type="number" 
-            id="image-scale" 
-            value={imageScale} 
-            onChange={(e) => setImageScale(parseFloat(e.target.value))} 
-            min="1" 
-            max="5" 
-            step="0.5" 
-          />
-        </div>
-      </div>
+      <H3>Export Settings</H3>
+      <FlexLayout gap={2}>
+        <FlexItem>
+          <FormField label="Width:">
+            <Input 
+              type="number" 
+              value={imageWidth} 
+              onChange={(e) => setImageWidth(parseInt(e.target.value, 10))} 
+              min={100} 
+            />
+          </FormField>
+        </FlexItem>
+        <FlexItem>
+          <FormField label="Height:">
+            <Input 
+              type="number" 
+              value={imageHeight} 
+              onChange={(e) => setImageHeight(parseInt(e.target.value, 10))} 
+              min={100} 
+            />
+          </FormField>
+        </FlexItem>
+        <FlexItem>
+          <FormField label="Scale:">
+            <Input 
+              type="number" 
+              value={imageScale} 
+              onChange={(e) => setImageScale(parseFloat(e.target.value))} 
+              min={1} 
+              max={5} 
+              step={0.5} 
+            />
+          </FormField>
+        </FlexItem>
+      </FlexLayout>
     </div>
   );
 };

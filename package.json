@@ -29,6 +29,10 @@
     ]
   },
   "dependencies": {
+    "@salt-ds/core": "^1.42.0",
+    "@salt-ds/icons": "^1.13.2",
+    "@salt-ds/lab": "^1.0.0-alpha.63",
+    "@salt-ds/theme": "^1.28.0",
     "@tanstack/react-router": "^1.114.3",
     "@tanstack/react-router-devtools": "^1.114.3",
     "mermaid": "^11.5.0",

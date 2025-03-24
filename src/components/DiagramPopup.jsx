@@ -1,33 +1,61 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { 
+  Button, 
+  FlexLayout, 
+  FlexItem, 
+  H2, 
+  Panel, 
+  Dialog
+} from '@salt-ds/core';
 
-const DiagramPopup = ({ diagramPreviewRef, handleZoomIn, handleZoomOut, closeDiagramPopup, handleCopyImage }) => {
+const DiagramPopup = ({ 
+  diagramPreviewRef, 
+  handleZoomIn, 
+  handleZoomOut, 
+  closeDiagramPopup, 
+  handleCopyImage 
+}) => {
+  // Make sure the diagram is properly displayed when the component mounts
+  useEffect(() => {
+    if (diagramPreviewRef.current) {
+      // Force a repaint of the SVG content
+      const svgContent = diagramPreviewRef.current.innerHTML;
+      diagramPreviewRef.current.innerHTML = svgContent;
+    }
+  }, [diagramPreviewRef]);
+
   return (
-    <div className="popup diagram-popup">
-      <div className="popup-content">
-        <div className="diagram-controls">
-          <h2>Diagram Preview</h2>
-          <div className="diagram-control-buttons">
-            <div className="tooltip-wrapper">
-              <button className="icon-button" onClick={handleZoomIn}>+</button>
-              <span className="tooltip-text">Zoom In</span>
-            </div>
-            <div className="tooltip-wrapper">
-              <button className="icon-button" onClick={handleZoomOut}>−</button>
-              <span className="tooltip-text">Zoom Out</span>
-            </div>
-            <div className="tooltip-wrapper">
-              <button onClick={handleCopyImage}>Copy Image</button>
-              <span className="tooltip-text">Copy to Clipboard</span>
-            </div>
-            <div className="tooltip-wrapper">
-              <button onClick={closeDiagramPopup}>Close</button>
-              <span className="tooltip-text">Close Preview</span>
-            </div>
+    <Dialog open onClose={closeDiagramPopup}>
+      <FlexLayout direction="column" gap={2}>
+        <FlexItem>
+          <FlexLayout justify="space-between" align="center">
+            <H2>Diagram Preview</H2>
+            <FlexLayout gap={1}>
+              <Button onClick={handleZoomIn} variant="secondary">+</Button>
+              <Button onClick={handleZoomOut} variant="secondary">−</Button>
+              <Button onClick={handleCopyImage} variant="secondary">Copy Image</Button>
+              <Button onClick={closeDiagramPopup} variant="secondary">Close</Button>
+            </FlexLayout>
+          </FlexLayout>
+        </FlexItem>
+        
+        <FlexItem>
+          <div className="diagram-container-wrapper">
+            <Panel 
+              className="diagram-preview" 
+              ref={diagramPreviewRef}
+              style={{ 
+                minHeight: '400px', 
+                overflow: 'auto', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center' 
+              }}
+            ></Panel>
           </div>
-        </div>
-        <div className="diagram-preview" ref={diagramPreviewRef}></div>
-      </div>
-    </div>
+        </FlexItem>
+      </FlexLayout>
+    </Dialog>
   );
 };
 

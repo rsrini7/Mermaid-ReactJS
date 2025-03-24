@@ -9,6 +9,10 @@ import {
   copyImageToClipboard 
 } from './utils/diagramUtils.js';
 
+// Import Salt Design System
+import { SaltProvider } from '@salt-ds/core';
+import { Button } from '@salt-ds/core';
+
 // Import components
 import Header from './components/Header';
 import InputSection from './components/InputSection';
@@ -64,6 +68,7 @@ const App = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+  // In the handleTemplateChange function
   const handleTemplateChange = (e) => {
     const selectedTemplate = e.target.value;
     if (selectedTemplate && templates[selectedTemplate]) {
@@ -74,6 +79,7 @@ const App = () => {
       const templateCode = templates[selectedTemplate];
       setMermaidCode(templateCode);
       
+      // Add a small delay to ensure state is updated before rendering
       setTimeout(() => {
         renderDiagramWithCode({
           code: templateCode,
@@ -82,7 +88,7 @@ const App = () => {
           setErrorMessage,
           mermaid
         });
-      }, 50);
+      }, 100); // Increased timeout for more complex diagrams
     }
   };
 
@@ -116,13 +122,19 @@ const App = () => {
   const openDiagramWindow = () => {
     setIsDiagramPopupOpen(true);
     
+    // Use a slightly longer timeout to ensure the component is mounted
     setTimeout(() => {
-      if (diagramPreviewRef.current) {
+      if (diagramPreviewRef.current && outputDivRef.current) {
         const currentDiagram = outputDivRef.current.innerHTML;
-        diagramPreviewRef.current.innerHTML = `<div class="diagram-container">${currentDiagram}</div>`;
-        setDiagramScale(1);
+        if (currentDiagram) {
+          diagramPreviewRef.current.innerHTML = `<div class="diagram-container" style="transform: scale(${diagramScale}); transform-origin: center top;">${currentDiagram}</div>`;
+        } else {
+          console.error("No diagram content found to display");
+        }
+      } else {
+        console.error("Reference to diagram preview or output div is null");
       }
-    }, 0);
+    }, 100);
   };
 
   const updateDiagramWindowScale = () => {
@@ -193,57 +205,59 @@ const App = () => {
   }, [isPopupOpen, isDiagramPopupOpen]);
 
   return (
-    <div className="app-container" data-theme={theme}>
-      <Header 
-        theme={theme} 
-        handleThemeToggle={handleThemeToggle} 
-        handleTemplateChange={handleTemplateChange} 
-      />
-
-      <div className="container">
-        <InputSection 
-          mermaidCode={mermaidCode}
-          setMermaidCode={setMermaidCode}
-          renderDiagram={renderDiagram}
-          handleOpenPopup={handleOpenPopup}
-          loading={loading}
-          errorMessage={errorMessage}
-          imageWidth={imageWidth}
-          setImageWidth={setImageWidth}
-          imageHeight={imageHeight}
-          setImageHeight={setImageHeight}
-          imageScale={imageScale}
-          setImageScale={setImageScale}
+    <SaltProvider mode={theme}>
+      <div className="app-container" data-theme={theme}>
+        <Header 
+          theme={theme} 
+          handleThemeToggle={handleThemeToggle} 
+          handleTemplateChange={handleTemplateChange} 
         />
 
-        <OutputSection 
-          outputDivRef={outputDivRef}
-          exportSvg={handleExportSvg}
-          exportPng={handleExportPng}
-          openDiagramWindow={openDiagramWindow}
-          handleCopyImage={handleOutputCopy}
-        />
+        <div className="container">
+          <InputSection 
+            mermaidCode={mermaidCode}
+            setMermaidCode={setMermaidCode}
+            renderDiagram={renderDiagram}
+            handleOpenPopup={handleOpenPopup}
+            loading={loading}
+            errorMessage={errorMessage}
+            imageWidth={imageWidth}
+            setImageWidth={setImageWidth}
+            imageHeight={imageHeight}
+            setImageHeight={setImageHeight}
+            imageScale={imageScale}
+            setImageScale={setImageScale}
+          />
+
+          <OutputSection 
+            outputDivRef={outputDivRef}
+            exportSvg={handleExportSvg}
+            exportPng={handleExportPng}
+            openDiagramWindow={openDiagramWindow}
+            handleCopyImage={handleOutputCopy}
+          />
+        </div>
+
+        {isPopupOpen && (
+          <EditorPopup 
+            mermaidCode={mermaidCode}
+            setMermaidCode={setMermaidCode}
+            handleSavePopup={handleSavePopup}
+            handleClosePopup={handleClosePopup}
+          />
+        )}
+
+        {isDiagramPopupOpen && (
+          <DiagramPopup 
+            diagramPreviewRef={diagramPreviewRef}
+            handleZoomIn={handleZoomIn}
+            handleZoomOut={handleZoomOut}
+            closeDiagramPopup={closeDiagramPopup}
+            handleCopyImage={handleDiagramCopy}
+          />
+        )}
       </div>
-
-      {isPopupOpen && (
-        <EditorPopup 
-          mermaidCode={mermaidCode}
-          setMermaidCode={setMermaidCode}
-          handleSavePopup={handleSavePopup}
-          handleClosePopup={handleClosePopup}
-        />
-      )}
-
-      {isDiagramPopupOpen && (
-        <DiagramPopup 
-          diagramPreviewRef={diagramPreviewRef}
-          handleZoomIn={handleZoomIn}
-          handleZoomOut={handleZoomOut}
-          closeDiagramPopup={closeDiagramPopup}
-          handleCopyImage={handleDiagramCopy}
-        />
-      )}
-    </div>
+    </SaltProvider>
   );
 };
 

@@ -1,4 +1,12 @@
 import React from 'react';
+import { 
+  Button, 
+  FlexLayout, 
+  FlexItem, 
+  Text,
+  MultilineInput,
+  H2
+} from '@salt-ds/core';
 import ExportSettings from './ExportSettings';
 
 const InputSection = ({ 
@@ -17,32 +25,44 @@ const InputSection = ({
 }) => {
   return (
     <div className="input-section">
-      <div className="input-header">
-        <h2>Mermaid Syntax</h2>
-        <div>
-          <button onClick={renderDiagram}>Render Diagram</button>
-          <button onClick={handleOpenPopup}>Open Editor</button>
-        </div>
-      </div>
-      <textarea
-        className="mermaid-textarea"
-        value={mermaidCode}
-        onChange={(e) => setMermaidCode(e.target.value)}
-        placeholder="Enter your Mermaid diagram syntax here..."
-      />
-      <div>
-        {loading && <span className="loading">Rendering...</span>}
-        <div className="error-message">{errorMessage}</div>
-      </div>
-
-      <ExportSettings
-        imageWidth={imageWidth}
-        setImageWidth={setImageWidth}
-        imageHeight={imageHeight}
-        setImageHeight={setImageHeight}
-        imageScale={imageScale}
-        setImageScale={setImageScale}
-      />
+      <FlexLayout direction="column" gap={2}>
+        <FlexItem>
+          <FlexLayout align="center" justify="space-between">
+            <H2>Mermaid Syntax</H2>
+            <FlexLayout gap={1}>
+              <Button onClick={renderDiagram} variant="primary">Render Diagram</Button>
+              <Button onClick={handleOpenPopup}>Open Editor</Button>
+            </FlexLayout>
+          </FlexLayout>
+        </FlexItem>
+        
+        <FlexItem>
+          <MultilineInput
+            className="mermaid-textarea"
+            value={mermaidCode}
+            onChange={(e) => setMermaidCode(e.target.value)}
+            placeholder="Enter your Mermaid diagram syntax here..."
+            multiline
+            rows={10}
+          />
+        </FlexItem>
+        
+        <FlexItem>
+          {loading && <Text emphasis="strong">Rendering...</Text>}
+          {errorMessage && <Text styleAs="error">{errorMessage}</Text>}
+        </FlexItem>
+        
+        <FlexItem>
+          <ExportSettings
+            imageWidth={imageWidth}
+            setImageWidth={setImageWidth}
+            imageHeight={imageHeight}
+            setImageHeight={setImageHeight}
+            imageScale={imageScale}
+            setImageScale={setImageScale}
+          />
+        </FlexItem>
+      </FlexLayout>
     </div>
   );
 };

@@ -1,73 +1,55 @@
 import React from 'react';
+import { 
+  Button, 
+  FlexLayout, 
+  FlexItem, 
+  Text, 
+  H1, 
+  Switch
+} from '@salt-ds/core';
 
 const Header = ({ theme, handleThemeToggle, handleTemplateChange }) => {
   return (
-    <>
-      <h1>Mermaid Diagram Generator</h1>
-
-      <div className="controls">
-        <div className="template-section">
-          <label htmlFor="template-select">Select Template: </label>
-          <select id="template-select" name="template-select" onChange={handleTemplateChange} defaultValue="flowchart">
-            <option value="">-- Select a diagram type --</option>
-            <optgroup label="Flow Charts">
-              <option value="flowchart">Flowchart (TD - Top Down)</option>
-              <option value="flowchart-lr">Flowchart (LR - Left to Right)</option>
-              <option value="flowchart-complex">Complex Flowchart with Subgraphs</option>
-            </optgroup>
-            <optgroup label="Sequence Diagrams">
-              <option value="sequence">Basic Sequence Diagram</option>
-              <option value="sequence-advanced">Advanced Sequence Diagram</option>
-            </optgroup>
-            <optgroup label="Class Diagrams">
-              <option value="class">Class Diagram</option>
-            </optgroup>
-            <optgroup label="State Diagrams">
-              <option value="state">State Diagram</option>
-            </optgroup>
-            <optgroup label="Entity Relationship">
-              <option value="er">Entity Relationship Diagram</option>
-            </optgroup>
-            <optgroup label="User Journey">
-              <option value="journey">User Journey</option>
-            </optgroup>
-            <optgroup label="Gantt Charts">
-              <option value="gantt">Gantt Chart</option>
-            </optgroup>
-            <optgroup label="Pie Charts">
-              <option value="pie">Pie Chart</option>
-            </optgroup>
-            <optgroup label="Requirement Diagrams">
-              <option value="requirement">Requirement Diagram</option>
-            </optgroup>
-            <optgroup label="Git Graphs">
-              <option value="git">Git Graph</option>
-            </optgroup>
-            <optgroup label="C4 Diagrams">
-              <option value="c4">C4 Context Diagram</option>
-            </optgroup>
-            <optgroup label="Mind Maps">
-              <option value="mindmap">Mind Map</option>
-            </optgroup>
-            <optgroup label="Timeline">
-              <option value="timeline">Timeline</option>
-            </optgroup>
-            <optgroup label="Quadrant Charts">
-              <option value="quadrant">Quadrant Chart</option>
-            </optgroup>
-          </select>
-        </div>
-        
-        <div className="theme-toggle">
-          <span className="theme-icon">☀️</span>
-          <label className="switch">
-            <input type="checkbox" checked={theme === 'dark'} onChange={handleThemeToggle} />
-            <span className="slider"></span>
-          </label>
-          <span className="theme-icon">🌙</span>
-        </div>
-      </div>
-    </>
+    <header className="app-header">
+      <FlexLayout align="center" justify="space-between">
+        <FlexItem>
+          <H1>Mermaid Diagram Generator</H1>
+        </FlexItem>
+        <FlexItem>
+          <FlexLayout align="center" gap={2}>
+            <FlexItem>
+              <Text>Select Template:</Text>
+              <select 
+                className="template-select" 
+                onChange={handleTemplateChange}
+                style={{ padding: '8px', borderRadius: '4px', marginLeft: '8px' }}
+              >
+                <option value="flowchart">Flowchart</option>
+                <option value="sequenceDiagram">Sequence Diagram</option>
+                <option value="classDiagram">Class Diagram</option>
+                <option value="stateDiagram">State Diagram</option>
+                <option value="entityRelationshipDiagram">Entity Relationship</option>
+                <option value="gantt">Gantt Chart</option>
+                <option value="pie">Pie Chart</option>
+                <option value="gitGraph">Git Graph</option>
+              </select>
+            </FlexItem>
+            <FlexItem>
+              <FlexLayout align="center" gap={1}>
+                <Text>Light</Text>
+                <Switch
+                  checked={theme === 'dark'}
+                  onChange={handleThemeToggle}
+                  label="Theme"
+                  hideLabel
+                />
+                <Text>Dark</Text>
+              </FlexLayout>
+            </FlexItem>
+          </FlexLayout>
+        </FlexItem>
+      </FlexLayout>
+    </header>
   );
 };
 
