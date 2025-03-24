@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DiagramPopup = ({ diagramPreviewRef, handleZoomIn, handleZoomOut, closeDiagramPopup }) => {
+const DiagramPopup = ({ diagramPreviewRef, handleZoomIn, handleZoomOut, closeDiagramPopup, handleCopyImage }) => {
   return (
     <div className="popup diagram-popup">
       <div className="popup-content">
@@ -14,6 +14,10 @@ const DiagramPopup = ({ diagramPreviewRef, handleZoomIn, handleZoomOut, closeDia
             <div className="tooltip-wrapper">
               <button className="icon-button" onClick={handleZoomOut}>−</button>
               <span className="tooltip-text">Zoom Out</span>
+            </div>
+            <div className="tooltip-wrapper">
+              <button onClick={handleCopyImage}>Copy Image</button>
+              <span className="tooltip-text">Copy to Clipboard</span>
             </div>
             <div className="tooltip-wrapper">
               <button onClick={closeDiagramPopup}>Close</button>
