@@ -93,8 +93,7 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
     const dataUrl = `data:image/svg+xml;base64,${base64Data}`;
 
     const img = new Image();
-    img.width = width;
-    img.height = height;
+    img.crossOrigin = 'anonymous'; // Add this to handle CORS
 
     img.onerror = () => {
       setErrorMessage('Error loading SVG for PNG conversion.');
@@ -112,13 +111,19 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
         ctx.scale(scale, scale);
         ctx.drawImage(img, 0, 0, width, height);
 
-        canvas.toBlob((blob) => {
-          if (blob) {
+        // Use a different approach to avoid the tainted canvas issue
+        canvas.toDataURL('image/png', 1.0);
+        
+        // Convert data URL to blob
+        const pngDataUrl = canvas.toDataURL('image/png');
+        fetch(pngDataUrl)
+          .then(res => res.blob())
+          .then(blob => {
             downloadFile(blob, 'mermaid-diagram.png');
-          } else {
-            setErrorMessage('Failed to create PNG. The diagram might be too complex.');
-          }
-        }, 'image/png');
+          })
+          .catch(err => {
+            setErrorMessage(`Error creating PNG: ${err.message}`);
+          });
       } catch (error) {
         setErrorMessage(`Error creating PNG: ${error.message}`);
       }
@@ -152,69 +157,68 @@ export const downloadFile = (blob, filename) => {
  */
 export const copyImageToClipboard = (svgElement) => {
   if (!svgElement) return;
+  
+  try {
+    // Get SVG data with proper namespaces
+    let svgData = new XMLSerializer().serializeToString(svgElement);
+    
+    // Ensure SVG has proper namespaces
+    if (!svgData.includes('xmlns="http://www.w3.org/2000/svg"')) {
+      svgData = svgData.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    
+    // Create a Blob from the SVG data
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml' });
+    
+    // Use the Clipboard API to write the SVG as an image
+    if (navigator.clipboard && navigator.clipboard.write) {
+      const clipboardItem = new ClipboardItem({
+        'image/svg+xml': svgBlob
+      });
+      
+      navigator.clipboard.write([clipboardItem])
+        .then(() => {
+          alert('Diagram copied to clipboard!');
+        })
+        .catch(err => {
+          console.error('Clipboard API error: ', err);
+          fallbackCopyMethod(svgData);
+        });
+    } else {
+      fallbackCopyMethod(svgData);
+    }
+  } catch (err) {
+    console.error('Copy error: ', err);
+    alert('Failed to copy diagram to clipboard.');
+  }
+};
 
-  // Create a canvas element to draw the SVG
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  
-  // Set canvas dimensions with higher resolution
-  const svgRect = svgElement.getBoundingClientRect();
-  const scaleFactor = 2; // Increase resolution by 2x
-  canvas.width = svgRect.width * scaleFactor;
-  canvas.height = svgRect.height * scaleFactor;
-  
-  // Create an image from the SVG with proper namespaces
-  const img = new Image();
-  let svgData = new XMLSerializer().serializeToString(svgElement);
-  
-  // Ensure SVG has proper namespaces
-  if (!svgData.includes('xmlns="http://www.w3.org/2000/svg"')) {
-    svgData = svgData.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
-  }
-  if (!svgData.includes('xmlns:xlink="http://www.w3.org/1999/xlink"')) {
-    svgData = svgData.replace('<svg', '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
-  }
-  
-  // Add width and height if not present
-  if (!svgElement.hasAttribute('width')) {
-    svgData = svgData.replace('<svg', `<svg width="${svgRect.width}"`);
-  }
-  if (!svgElement.hasAttribute('height')) {
-    svgData = svgData.replace('<svg', `<svg height="${svgRect.height}"`);
-  }
-  
-  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(svgBlob);
-  
-  img.onload = () => {
-    // Draw white background and the image with higher resolution
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.scale(scaleFactor, scaleFactor);
-    ctx.drawImage(img, 0, 0);
+/**
+ * Fallback method for copying SVG when Clipboard API is not available
+ * @param {string} svgData - SVG data as string
+ */
+const fallbackCopyMethod = (svgData) => {
+  try {
+    // Create a textarea element to hold the SVG data
+    const textarea = document.createElement('textarea');
+    textarea.value = svgData;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
     
-    // Convert to blob with higher quality
-    canvas.toBlob(blob => {
-      try {
-        // Create a ClipboardItem and write to clipboard
-        const item = new ClipboardItem({ 'image/png': blob });
-        navigator.clipboard.write([item])
-          .then(() => {
-            alert('High-resolution diagram copied to clipboard!');
-          })
-          .catch(err => {
-            console.error('Failed to copy: ', err);
-            alert('Failed to copy diagram. See console for details.');
-          });
-      } catch (err) {
-        console.error('Clipboard API error: ', err);
-        alert('Your browser may not support copying images to clipboard.');
-      }
-    }, 'image/png', 1.0); // Use maximum quality (1.0)
+    // Select the text and copy
+    textarea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textarea);
     
-    // Clean up
-    URL.revokeObjectURL(url);
-  };
-  
-  img.src = url;
+    if (successful) {
+      alert('SVG code copied to clipboard! You can paste it into an SVG editor.');
+    } else {
+      alert('Failed to copy diagram to clipboard.');
+    }
+  } catch (err) {
+    console.error('Fallback copy error: ', err);
+    alert('Your browser does not support copying to clipboard.');
+  }
 };
