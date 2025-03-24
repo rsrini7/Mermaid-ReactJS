@@ -31,10 +31,10 @@ const DiagramPopup = ({
           <FlexLayout justify="space-between" align="center">
             <H2>Diagram Preview</H2>
             <FlexLayout gap={1}>
-              <Button onClick={handleZoomIn} variant="secondary">+</Button>
-              <Button onClick={handleZoomOut} variant="secondary">−</Button>
-              <Button onClick={handleCopyImage} variant="secondary">Copy Image</Button>
-              <Button onClick={closeDiagramPopup} variant="secondary">Close</Button>
+              <Button onClick={handleZoomIn} appearance="solid" sentiment="positive">+</Button>
+              <Button onClick={handleZoomOut} appearance="solid" sentiment="negative">−</Button>
+              <Button onClick={handleCopyImage} appearance="solid" sentiment="neutral">Copy Image</Button>
+              <Button onClick={closeDiagramPopup} appearance="solid" sentiment="neutral">Close</Button>
             </FlexLayout>
           </FlexLayout>
         </FlexItem>
@@ -44,13 +44,6 @@ const DiagramPopup = ({
             <Panel 
               className="diagram-preview" 
               ref={diagramPreviewRef}
-              style={{ 
-                minHeight: '400px', 
-                overflow: 'auto', 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center' 
-              }}
             ></Panel>
           </div>
         </FlexItem>

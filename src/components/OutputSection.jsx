@@ -21,10 +21,38 @@ const OutputSection = ({
           <FlexLayout align="center" justify="space-between">
             <H2>Rendered Diagram</H2>
             <FlexLayout gap={1}>
-              <Button onClick={handleCopyImage}>Copy Image</Button>
-              <Button onClick={exportSvg}>Export as SVG</Button>
-              <Button onClick={exportPng}>Export as PNG</Button>
-              <Button onClick={openDiagramWindow} variant="primary">Open Diagram</Button>
+              <Button 
+                onClick={handleCopyImage} 
+                appearance="solid" 
+                sentiment="neutral"
+                style={{ minWidth: '120px' }}
+              >
+                Copy Image
+              </Button>
+              <Button 
+                onClick={exportSvg} 
+                appearance="solid" 
+                sentiment="neutral"
+                style={{ minWidth: '120px' }}
+              >
+                Export as SVG
+              </Button>
+              <Button 
+                onClick={exportPng} 
+                appearance="solid" 
+                sentiment="neutral"
+                style={{ minWidth: '120px' }}
+              >
+                Export as PNG
+              </Button>
+              <Button 
+                onClick={openDiagramWindow} 
+                appearance="solid" 
+                sentiment="positive"
+                style={{ minWidth: '120px' }}
+              >
+                Open Diagram
+              </Button>
             </FlexLayout>
           </FlexLayout>
         </FlexItem>

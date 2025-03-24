@@ -17,13 +17,9 @@ import App from "./App.jsx";
 
 const rootRoute = createRootRoute({
   component: () => (
-    <>
-    
-    
+    <>    
       <Outlet />
       <TanStackRouterDevtools />
-      
-    
     </>
   ),
 });

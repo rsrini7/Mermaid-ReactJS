@@ -30,8 +30,8 @@ const InputSection = ({
           <FlexLayout align="center" justify="space-between">
             <H2>Mermaid Syntax</H2>
             <FlexLayout gap={1}>
-              <Button onClick={renderDiagram} variant="primary">Render Diagram</Button>
-              <Button onClick={handleOpenPopup}>Open Editor</Button>
+              <Button onClick={renderDiagram} appearance="solid" sentiment='positive'>Render Diagram</Button>
+              <Button onClick={handleOpenPopup} appearance="bordered">Open Editor</Button>
             </FlexLayout>
           </FlexLayout>
         </FlexItem>

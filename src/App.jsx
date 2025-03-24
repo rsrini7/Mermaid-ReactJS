@@ -11,7 +11,6 @@ import {
 
 // Import Salt Design System
 import { SaltProvider } from '@salt-ds/core';
-import { Button } from '@salt-ds/core';
 
 // Import components
 import Header from './components/Header';
