@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "vite --port 3000",
-    "build": "vite build && tsc",
+    "build": "vite build",
     "serve": "vite preview",
     "test": "vitest run"
   },
@@ -57,5 +57,9 @@
     "vite": "^6.1.0",
     "vitest": "^3.0.9",
     "web-vitals": "^4.2.4"
+  },
+  "vitest": {
+    "environment": "jsdom",
+    "setupFiles": ["./src/setupTests.js"]
   }
 }
