@@ -25,12 +25,16 @@ const DiagramPopup = ({
   }, [diagramPreviewRef]);
 
   return (
-    <Dialog open onClose={closeDiagramPopup}>
-      <FlexLayout direction="column" gap={2}>
+    <Dialog 
+      open 
+      onClose={closeDiagramPopup}
+      className="diagram-popup"
+    >
+      <FlexLayout direction="column" gap={2} className="diagram-popup-content">
         <FlexItem>
-          <FlexLayout justify="space-between" align="center">
+          <FlexLayout justify="space-between" align="center" style={{ marginBottom: '16px' }}>
             <H2>Diagram Preview</H2>
-            <FlexLayout gap={1}>
+            <FlexLayout gap={2}>
               <Button onClick={handleZoomIn} appearance="solid" sentiment="positive">+</Button>
               <Button onClick={handleZoomOut} appearance="solid" sentiment="negative">−</Button>
               <Button onClick={handleCopyImage} appearance="solid" sentiment="neutral">Copy Image</Button>

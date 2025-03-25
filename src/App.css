@@ -290,15 +290,15 @@ button:disabled {
 /* Diagram preview */
 .diagram-preview {
   overflow: auto;
-  max-height: 90vh;
   max-width: 100%;
   width: 100%;
   height: 90%;
   border: 1px solid var(--salt-container-borderColor);
   padding: var(--salt-spacing-300);
   border-radius: var(--salt-container-borderRadius);
-  display: block;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: var(--salt-container-primary-background);
 }
 
@@ -313,6 +313,46 @@ button:disabled {
 .diagram-container svg {
   max-width: 100%;
   min-width: 300px;
+  height: auto;
+}
+
+/* Diagram Popup Styles */
+.diagram-popup {
+  width: 100vw;
+  height: 100vh;
+  margin: 20px;
+}
+
+.saltDialog.diagram-popup .saltDialog-window {
+  width: 100%;
+  height: 100%;
+  margin: 20px;
+}
+
+.diagram-popup-content {
+  height: 100%;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.diagram-container-wrapper {
+  height: 100%;
+  overflow: auto;
+  border: 1px solid var(--salt-container-borderColor);
+  border-radius: var(--salt-container-borderRadius);
+  background-color: var(--salt-container-primary-background);
+  padding: 24px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+  margin: 16px;
+  
+  /* Add a subtle grid background for better visual reference */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Ensure SVG scales properly in the preview */
+.diagram-preview svg {
   height: auto;
 }
 
@@ -400,4 +440,41 @@ footer {
   height: 36px;
   min-width: 180px;
   padding: var(--salt-spacing-100) var(--salt-spacing-200);
+}
+
+/* Add these styles at the end of your CSS file */
+
+/* Diagram Popup Styles */
+.diagram-popup {
+  width: 90vw;
+  height: 90vh;
+  margin: 20px;
+}
+
+.saltDialog.diagram-popup .saltDialog-window {
+  width: 100%;
+  height: 100%;
+  margin: 20px;
+}
+
+.diagram-popup-content {
+  height: 100%;
+  padding: 12px;
+  overflow: auto;
+}
+
+.diagram-container-wrapper {
+  height: 100%;
+  overflow: auto;
+  border: 1px solid var(--salt-container-borderColor);
+  border-radius: var(--salt-container-borderRadius);
+  background-color: var(--salt-container-primary-background);
+  padding: 24px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+  margin: 16px;
+  
+  /* Add a subtle grid background for better visual reference */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
