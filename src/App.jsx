@@ -18,7 +18,8 @@ const App = () => {
   const [imageHeight, setImageHeight] = useState(600);
   const [imageScale, setImageScale] = useState(1);
   const [mode, setMode] = useState('light');
-  
+  const [diagramZoom, setDiagramZoom] = useState(1); // Add state for zoom level
+
   const outputDivRef = useRef(null);
   const diagramPreviewRef = useRef(null);
 
@@ -70,6 +71,15 @@ const App = () => {
 
   const handleCloseDiagram = () => {
     setShowDiagramPopup(false);
+    setDiagramZoom(1); // Reset zoom on close
+  };
+
+  const handleZoomIn = () => {
+    setDiagramZoom(prevZoom => Math.min(prevZoom + 0.1, 3)); // Limit max zoom
+  };
+
+  const handleZoomOut = () => {
+    setDiagramZoom(prevZoom => Math.max(prevZoom - 0.1, 0.1)); // Limit min zoom
   };
 
   const handleExportSvg = () => {
@@ -161,10 +171,13 @@ const App = () => {
         </main>
         
         {showDiagramPopup && (
-          <DiagramPopup 
+          <DiagramPopup
             diagramPreviewRef={diagramPreviewRef}
-            handleClose={handleCloseDiagram}
+            closeDiagramPopup={handleCloseDiagram} // Correct prop name
+            handleZoomIn={handleZoomIn} // Pass zoom handlers
+            handleZoomOut={handleZoomOut} // Pass zoom handlers
             handleCopyImage={handleCopyImage}
+            zoomLevel={diagramZoom} // Pass zoom level for styling
           />
         )}
         

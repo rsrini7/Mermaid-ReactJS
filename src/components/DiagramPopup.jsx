@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DiagramPopup = ({ diagramPreviewRef, handleZoomIn, handleZoomOut, closeDiagramPopup, handleCopyImage }) => {
+const DiagramPopup = ({ diagramPreviewRef, handleZoomIn, handleZoomOut, closeDiagramPopup, handleCopyImage, zoomLevel }) => { // Add zoomLevel prop
   return (
     <div className="popup diagram-popup">
       <div className="popup-content">
@@ -25,7 +25,12 @@ const DiagramPopup = ({ diagramPreviewRef, handleZoomIn, handleZoomOut, closeDia
             </div>
           </div>
         </div>
-        <div className="diagram-preview" ref={diagramPreviewRef}></div>
+        {/* Apply zoom level using inline style */}
+        <div 
+          className="diagram-preview" 
+          ref={diagramPreviewRef} 
+          style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
+        ></div>
       </div>
     </div>
   );

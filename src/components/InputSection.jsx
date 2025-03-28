@@ -1,12 +1,12 @@
 import React from 'react';
 import ExportSettings from './ExportSettings';
 
-const InputSection = ({ 
-  mermaidCode, 
-  setMermaidCode, 
-  renderDiagram, 
-  handleOpenPopup, 
-  loading, 
+const InputSection = ({
+  mermaidCode,
+  setMermaidCode,
+  renderDiagram,
+  handleOpenEditor, // Correct prop name received
+  loading,
   errorMessage,
   imageWidth,
   setImageWidth,
@@ -21,7 +21,8 @@ const InputSection = ({
         <h2>Mermaid Syntax</h2>
         <div>
           <button onClick={renderDiagram}>Render Diagram</button>
-          <button onClick={handleOpenPopup}>Open Editor</button>
+          {/* Use the correct handler */}
+          <button onClick={handleOpenEditor}>Open Editor</button>
         </div>
       </div>
       <textarea
