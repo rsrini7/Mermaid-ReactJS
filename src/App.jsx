@@ -16,6 +16,9 @@ import OutputSection from './components/OutputSection';
 import EditorPopup from './components/EditorPopup';
 import DiagramPopup from './components/DiagramPopup';
 
+// Add this console log to verify the component is loading
+console.log("App component is loading");
+
 const App = () => {
   const [theme, setTheme] = useState('light');
   const [mermaidCode, setMermaidCode] = useState(templates.flowchart);
