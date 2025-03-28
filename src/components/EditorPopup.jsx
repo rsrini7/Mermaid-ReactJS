@@ -8,7 +8,7 @@ const EditorPopup = ({ mermaidCode, setMermaidCode, handleSavePopup, handleClose
           <h2>Edit Mermaid Syntax</h2>
           <div className="popup-header-buttons">
             <button onClick={handleSavePopup}>Save and Close</button>
-            <button onClick={handleClosePopup}>Close Without Saving</button>
+            <button onClick={handleClosePopup}>Close Without Saving</button> {/* This button uses handleClosePopup */}
           </div>
         </div>
         <textarea

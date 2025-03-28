@@ -1,406 +1,294 @@
-/* Root variables and base styling */
-:root {
-  --primary-color: #3498db;
-  --primary-hover: #2980b9;
-  --secondary-color: #f8f9fa;
-  --border-color: #e1e4e8;
-  --text-color: #333;
-  --success-color: #2ecc71;
-  --warning-color: #f39c12;
-  --error-color: #e74c3c;
-  --border-radius: 6px;
-  --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  --transition: all 0.3s ease;
-}
-
-/* Base styles */
+/* General Styles */
 body {
+  font-family: sans-serif;
   margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: #f5f7fa;
-  color: var(--text-color);
-  line-height: 1.6;
+  background-color: #f4f4f4; /* Light background for the body */
+  color: #333;
 }
 
-#root {
+.app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-/* App container */
-.app-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-  width: 100%;
-  box-sizing: border-box;
-  flex: 1;
-}
-
-/* Header styling */
+/* Header Styles */
 .app-header {
-  background-color: white;
-  padding: 16px 24px;
-  box-shadow: var(--shadow);
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 24px;
-  color: var(--primary-color);
+  background-color: #333; /* Dark header */
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .app-header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-/* Main content layout */
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Main Container Styles */
 .container {
   display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-@media (min-width: 1024px) {
-  .container {
-    flex-wrap: nowrap;
-  }
-}
-
-/* Input section */
-.input-section {
-  flex: 1;
-  min-width: 300px;
-  background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
+  flex-grow: 1;
   padding: 20px;
-  border: 1px solid var(--border-color);
+  gap: 20px; /* Space between input and output sections */
+  max-width: 1200px; /* Limit overall width */
+  margin: 20px auto; /* Center the container */
+  background-color: #fff; /* White background for the main content area */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-radius: 8px;
 }
 
-/* Template select styling */
-.template-select {
-  height: 36px;
-  min-width: 180px;
-  padding: 8px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  background-color: white;
-  margin-right: 12px;
-  font-size: 14px;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 16px;
+/* Input & Output Section Styles */
+.input-section, .output-section {
+  flex: 1; /* Each section takes half the space */
+  display: flex;
+  flex-direction: column;
+  background-color: #fff; /* Ensure white background */
+  padding: 20px;
+  border-radius: 8px; /* Optional: round corners */
+  /* Removed border as the container provides separation */
 }
 
-.template-select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-}
-
-.input-header {
+.input-header, .output-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
 }
 
-.input-header > div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.input-header h2 {
+.input-header h2, .output-header h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 1.2rem;
+  color: #555;
 }
 
+.input-header div, .output-controls {
+  display: flex;
+  gap: 10px; /* Space between buttons */
+}
+
+/* Textarea Styles */
 .mermaid-textarea {
+  flex-grow: 1;
   width: 100%;
-  min-height: 300px;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  resize: vertical;
-  transition: var(--transition);
+  min-height: 300px; /* Ensure a decent minimum height */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  resize: vertical; /* Allow vertical resizing */
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+  margin-bottom: 10px; /* Space below textarea */
 }
 
-.mermaid-textarea:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+/* Output Diagram Container Styles */
+.mermaid-output-container {
+  flex-grow: 1;
+  border: 1px solid #eee;
+  padding: 10px;
+  background-color: #fdfdfd; /* Slightly off-white background for contrast */
+  display: flex; /* Use flexbox for centering */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  min-height: 300px; /* Match textarea min-height */
+  overflow: auto; /* Add scrollbars if diagram is too large */
+  position: relative; /* Needed for absolute positioning of loading indicator */
 }
 
-/* Output section */
-.output-section {
-  flex: 1;
-  min-width: 300px;
-  background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  padding: 20px;
-  border: 1px solid var(--border-color);
+.mermaid-output-container.loading {
+  opacity: 0.5; /* Dim the container while loading */
 }
 
-.output-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-color);
+.mermaid-output-container svg {
+  max-width: 100%; /* Ensure SVG scales down */
+  max-height: 100%; /* Ensure SVG scales down */
+  display: block; /* Remove extra space below SVG */
 }
 
-.output-header h2 {
-  margin: 0;
-  font-size: 18px;
+/* Loading and Error Message Styles */
+.loading-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  z-index: 10; /* Ensure it's above the dimmed container */
 }
 
-.mermaid-output {
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 20px;
-  min-height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--secondary-color);
-  overflow: auto;
+.error-message {
+  color: #d9534f; /* Bootstrap danger color */
+  background-color: #f2dede;
+  border: 1px solid #ebccd1;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px; /* Space above error message */
+  font-size: 0.9rem;
 }
 
-.mermaid-output svg {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Button styles */
+/* Button Styles */
 button {
-  padding: 8px 16px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: var(--border-radius);
+  padding: 8px 15px;
+  border: 1px solid #ccc;
+  background-color: #f8f8f8;
+  color: #333;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: var(--transition);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 button:hover {
-  background-color: var(--primary-hover);
-}
-
-button:active {
-  transform: translateY(1px);
+  background-color: #eee;
+  border-color: #bbb;
 }
 
 button:disabled {
-  opacity: 0.6;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
-button.secondary {
-  background-color: var(--secondary-color);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
+/* Specific Button Styles */
+.input-header button:first-of-type { /* Render button */
+  background-color: #5cb85c; /* Green */
+  color: white;
+  border-color: #4cae4c;
+}
+.input-header button:first-of-type:hover {
+  background-color: #4cae4c;
 }
 
-button.secondary:hover {
-  background-color: #e9ecef;
-}
-
-/* Resolution settings */
-.resolution-settings {
-  margin-top: 16px;
-  padding: 16px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  background-color: var(--secondary-color);
-}
-
-.settings-inputs {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.settings-inputs label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 14px;
-}
-
-.settings-inputs input {
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  width: 80px;
-}
-
-/* Popup styles */
+/* Popup Styles */
 .popup {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1000; /* Ensure popups are on top */
 }
 
 .popup-content {
   background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  width: 90%;
-  height: 90%;
-  max-width: 1200px;
-  max-height: 800px;
+  padding: 30px; /* More padding */
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 80%; /* Wider popup */
+  max-width: 900px; /* Max width */
+  height: 80%; /* Taller popup */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden; /* Prevent content spill */
 }
 
 .popup-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
 }
 
 .popup-header h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 1.4rem;
 }
 
-.popup-body {
-  flex: 1;
-  padding: 20px;
-  overflow: auto;
-}
-
-.popup-footer {
-  padding: 16px 20px;
-  border-top: 1px solid var(--border-color);
+.popup-header-buttons {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  gap: 10px;
 }
 
-/* Diagram popup specific styles */
-.diagram-popup-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+.popup-textarea {
+  flex-grow: 1; /* Take remaining vertical space */
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  resize: none; /* Disable resizing in popup */
+  box-sizing: border-box;
 }
 
-.diagram-container-wrapper {
-  flex: 1;
-  overflow: auto;
-  padding: 20px;
+/* Diagram Popup Specific Styles */
+.diagram-popup .popup-content {
+  width: 90%; /* Even wider for diagram */
+  max-width: 1200px;
+  height: 90%;
+}
+
+.diagram-controls {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  background-color: var(--secondary-color);
-  background-image: 
-    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.diagram-control-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .diagram-preview {
-  display: flex;
+  flex-grow: 1;
+  overflow: auto; /* Enable scrolling for zoomed diagram */
+  background-color: #f9f9f9; /* Light background for preview area */
+  border: 1px solid #eee;
+  border-radius: 4px;
+  display: flex; /* Centering */
   justify-content: center;
   align-items: center;
-  min-height: 100%;
+  /* transform-origin is set via inline style in the component */
 }
 
-/* Loading indicator */
-.loading {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  border-top-color: var(--primary-color);
-  animation: spin 1s ease-in-out infinite;
-  margin-right: 8px;
+.diagram-preview svg {
+  display: block; /* Prevent extra space */
+  max-width: none; /* Allow SVG to exceed container for zooming */
+  max-height: none;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Error message */
-.error-message {
-  color: var(--error-color);
-  padding: 12px;
-  background-color: rgba(231, 76, 60, 0.1);
-  border-radius: var(--border-radius);
-  margin-top: 12px;
-  font-size: 14px;
-}
-
-/* Tooltip styles */
+/* Tooltip Styles */
 .tooltip-wrapper {
   position: relative;
   display: inline-block;
 }
 
-.tooltip-wrapper .tooltip-text {
+.tooltip-text {
   visibility: hidden;
-  background-color: #333;
-  color: white;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
   text-align: center;
-  border-radius: 4px;
-  padding: 6px 10px;
+  border-radius: 6px;
+  padding: 5px 0;
   position: absolute;
   z-index: 1;
-  bottom: 125%;
+  bottom: 125%; /* Position above the button */
   left: 50%;
-  transform: translateX(-50%);
+  margin-left: -60px; /* Center the tooltip */
   opacity: 0;
   transition: opacity 0.3s;
-  white-space: nowrap;
-  font-size: 12px;
-}
-
-.tooltip-wrapper .tooltip-text::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #333 transparent transparent transparent;
 }
 
 .tooltip-wrapper:hover .tooltip-text {
@@ -408,40 +296,140 @@ button.secondary:hover {
   opacity: 1;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-  
-  .input-section, .output-section {
-    max-width: 100%;
-  }
+/* Icon Button Style (Example for Zoom) */
+.icon-button {
+  font-size: 1.2rem;
+  padding: 5px 10px;
 }
 
-/* Add these styles to your App.css */
+/* Export Settings Styles */
+.export-settings {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
 
-.input-actions {
+.export-settings h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #666;
+}
+
+.export-settings div {
   display: flex;
+  gap: 15px;
   align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
-.render-button {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 8px 16px;
-  font-weight: 500;
-  min-width: 120px;
+.export-settings label {
+  font-size: 0.9rem;
+  width: 80px; /* Align labels */
 }
 
-.render-button:hover {
-  background-color: var(--primary-hover);
+.export-settings input[type="number"] {
+  width: 80px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.render-button:disabled {
+/* Dark Mode Styles (using SaltProvider context) */
+[data-mode='dark'] body {
+  background-color: #222;
+  color: #eee;
+}
+
+[data-mode='dark'] .app-header {
+  background-color: #1a1a1a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+[data-mode='dark'] .container {
+  background-color: #333;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+[data-mode='dark'] .input-section, 
+[data-mode='dark'] .output-section {
+  background-color: #333;
+  color: #eee;
+}
+
+[data-mode='dark'] .input-header, 
+[data-mode='dark'] .output-header,
+[data-mode='dark'] .export-settings {
+  border-color: #444;
+}
+
+[data-mode='dark'] .input-header h2, 
+[data-mode='dark'] .output-header h2,
+[data-mode='dark'] .export-settings h3 {
+  color: #ccc;
+}
+
+[data-mode='dark'] .mermaid-textarea,
+[data-mode='dark'] .popup-textarea,
+[data-mode='dark'] .export-settings input[type="number"] {
+  background-color: #2a2a2a;
+  color: #eee;
+  border-color: #555;
+}
+
+[data-mode='dark'] .mermaid-output-container {
+  background-color: #2c2c2c;
+  border-color: #444;
+}
+
+[data-mode='dark'] button {
+  background-color: #444;
+  color: #eee;
+  border-color: #666;
+}
+
+[data-mode='dark'] button:hover {
+  background-color: #555;
+  border-color: #777;
+}
+
+[data-mode='dark'] button:disabled {
+   opacity: 0.5;
+}
+
+[data-mode='dark'] .input-header button:first-of-type { /* Render button */
+  background-color: #4cae4c; /* Keep green for contrast */
+  border-color: #3a8f3a;
+}
+[data-mode='dark'] .input-header button:first-of-type:hover {
+  background-color: #3a8f3a;
+}
+
+[data-mode='dark'] .popup {
+  background-color: rgba(0, 0, 0, 0.8); /* Darker overlay */
+}
+
+[data-mode='dark'] .popup-content {
+  background-color: #333;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+[data-mode='dark'] .popup-header {
+   border-color: #444;
+}
+
+[data-mode='dark'] .diagram-preview {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+[data-mode='dark'] .error-message {
+  color: #f2dede; 
+  background-color: #a94442; /* Darker red background */
+  border-color: #843534;
+}
+
+[data-mode='dark'] .tooltip-text {
   background-color: #ccc;
-  cursor: not-allowed;
+  color: #333;
 }

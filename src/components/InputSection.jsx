@@ -5,9 +5,9 @@ const InputSection = ({
   mermaidCode,
   setMermaidCode,
   renderDiagram,
-  handleOpenEditor, // Correct prop name received
+  handleOpenEditor,
   loading,
-  errorMessage,
+  errorMessage, // Receive errorMessage prop
   imageWidth,
   setImageWidth,
   imageHeight,
@@ -20,9 +20,10 @@ const InputSection = ({
       <div className="input-header">
         <h2>Mermaid Syntax</h2>
         <div>
-          <button onClick={renderDiagram}>Render Diagram</button>
-          {/* Use the correct handler */}
-          <button onClick={handleOpenEditor}>Open Editor</button>
+          <button onClick={renderDiagram} disabled={loading}>
+            {loading ? 'Rendering...' : 'Render Diagram'}
+          </button>
+          <button onClick={handleOpenEditor} disabled={loading}>Open Editor</button>
         </div>
       </div>
       <textarea
@@ -30,11 +31,10 @@ const InputSection = ({
         value={mermaidCode}
         onChange={(e) => setMermaidCode(e.target.value)}
         placeholder="Enter your Mermaid diagram syntax here..."
+        readOnly={loading} // Prevent editing while rendering
       />
-      <div>
-        {loading && <span className="loading">Rendering...</span>}
-        <div className="error-message">{errorMessage}</div>
-      </div>
+      {/* Display error message below textarea */}
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
 
       <ExportSettings
         imageWidth={imageWidth}
