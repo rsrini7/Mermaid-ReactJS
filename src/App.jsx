@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
 import './App.css';
@@ -20,9 +21,10 @@ const App = () => {
   const [mode, setMode] = useState('light');
   const [diagramZoom, setDiagramZoom] = useState(1);
   const [tempMermaidCode, setTempMermaidCode] = useState(mermaidCode);
+  const [previewSvgContent, setPreviewSvgContent] = useState(''); // State for SVG content
 
   const outputDivRef = useRef(null);
-  const diagramPreviewRef = useRef(null);
+  // diagramPreviewRef is now managed within DiagramPopup
 
   useEffect(() => {
     mermaid.initialize({
@@ -67,17 +69,25 @@ const App = () => {
     // renderDiagram(); 
   };
 
-  const handleOpenDiagram = () => {
-    // Ensure refs exist and the output div has the rendered SVG content
-    if (diagramPreviewRef.current && outputDivRef.current && outputDivRef.current.querySelector('svg')) {
-      setError(null); // Clear any previous "render first" error
-      diagramPreviewRef.current.innerHTML = outputDivRef.current.innerHTML;
-      setShowDiagramPopup(true);
-    } else {
-      console.warn("Diagram not rendered yet or refs not available.");
-      // Set an error message to guide the user
-      setError("Please render the diagram first before opening the preview.");
+  const handleOpenDiagram = async () => {
+    setError(null); // Clear previous errors
+
+    // Ensure the diagram is rendered in the main output area first
+    if (!outputDivRef.current?.querySelector('svg')) {
+      await renderDiagram(); // Render if not present
+      // Check again after attempting to render
+      if (!outputDivRef.current?.querySelector('svg')) {
+        setError("Failed to generate diagram for preview.");
+        return;
+      }
     }
+
+    // Get the SVG content from the main output
+    const svgContent = outputDivRef.current.innerHTML;
+
+    // Set the SVG content for the popup and show it
+    setPreviewSvgContent(svgContent);
+    setShowDiagramPopup(true);
   };
 
   const handleCloseDiagram = () => {
@@ -257,12 +267,12 @@ const App = () => {
         
         {showDiagramPopup && (
           <DiagramPopup
-            diagramPreviewRef={diagramPreviewRef}
-            closeDiagramPopup={handleCloseDiagram} 
-            handleZoomIn={handleZoomIn} 
-            handleZoomOut={handleZoomOut} 
+            svgContent={previewSvgContent} // Pass SVG content as prop
+            closeDiagramPopup={handleCloseDiagram}
+            handleZoomIn={handleZoomIn}
+            handleZoomOut={handleZoomOut}
             handleCopyImage={handleCopyImage} // Pass copy handler
-            zoomLevel={diagramZoom} 
+            zoomLevel={diagramZoom}
           />
         )}
         
