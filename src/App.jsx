@@ -2,251 +2,181 @@ import React, { useState, useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
 import './App.css';
 import templates from './utils/mermaidTemplates.js';
-import { 
-  renderDiagramWithCode, 
-  exportSvg, 
-  exportPng, 
-  copyImageToClipboard 
-} from './utils/diagramUtils.js';
-
-// Import components
-import Header from './components/Header';
-import InputSection from './components/InputSection';
+import { SaltProvider } from '@salt-ds/core';
+import InputSection from './components/inputsection';
 import OutputSection from './components/OutputSection';
-import EditorPopup from './components/EditorPopup';
 import DiagramPopup from './components/DiagramPopup';
-
-// Add this console log to verify the component is loading
-console.log("App component is loading");
+import EditorPopup from './components/EditorPopup';
 
 const App = () => {
-  const [theme, setTheme] = useState('light');
   const [mermaidCode, setMermaidCode] = useState(templates.flowchart);
-  const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [diagramScale, setDiagramScale] = useState(1);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isDiagramPopupOpen, setIsDiagramPopupOpen] = useState(false);
-  const [imageWidth, setImageWidth] = useState(1200);
-  const [imageHeight, setImageHeight] = useState(1000);
+  const [error, setError] = useState(null);
+  const [showDiagramPopup, setShowDiagramPopup] = useState(false);
+  const [showEditorPopup, setShowEditorPopup] = useState(false);
+  const [imageWidth, setImageWidth] = useState(800);
+  const [imageHeight, setImageHeight] = useState(600);
   const [imageScale, setImageScale] = useState(1);
-
+  const [mode, setMode] = useState('light');
+  
   const outputDivRef = useRef(null);
   const diagramPreviewRef = useRef(null);
 
-  // Initialize mermaid and handle theme changes
   useEffect(() => {
     mermaid.initialize({
-      startOnLoad: false,
-      theme: theme === 'dark' ? 'dark' : 'default',
-      securityLevel: 'loose'
+      startOnLoad: true,
+      theme: mode === 'light' ? 'default' : 'dark',
+      securityLevel: 'loose',
     });
-    
-    // Only render on theme change if we already have a diagram rendered
-    if (outputDivRef.current && outputDivRef.current.innerHTML) {
-      renderDiagram();
-    }
-  }, [theme]);
+  }, [mode]);
 
-  // Initial render
-  useEffect(() => {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: theme === 'dark' ? 'dark' : 'default',
-      securityLevel: 'loose'
-    });
+  const renderDiagram = async () => {
+    if (!outputDivRef.current) return;
     
-    const timer = setTimeout(() => {
-      renderDiagram();
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleThemeToggle = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-
-  const handleTemplateChange = (e) => {
-    const selectedTemplate = e.target.value;
-    if (selectedTemplate && templates[selectedTemplate]) {
-      if (outputDivRef.current) {
-        outputDivRef.current.innerHTML = '';
-      }
+    try {
+      setLoading(true);
+      setError(null);
+      outputDivRef.current.innerHTML = '';
       
-      const templateCode = templates[selectedTemplate];
-      setMermaidCode(templateCode);
-      
-      setTimeout(() => {
-        renderDiagramWithCode({
-          code: templateCode,
-          outputDivRef,
-          setLoading,
-          setErrorMessage,
-          mermaid
-        });
-      }, 50);
+      const { svg } = await mermaid.render('mermaid-diagram', mermaidCode);
+      outputDivRef.current.innerHTML = svg;
+    } catch (err) {
+      console.error('Mermaid rendering error:', err);
+      setError(`Error rendering diagram: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderDiagram = () => {
-    renderDiagramWithCode({
-      code: mermaidCode,
-      outputDivRef,
-      setLoading,
-      setErrorMessage,
-      mermaid
-    });
+  const handleOpenEditor = () => {
+    setShowEditorPopup(true);
+  };
+
+  const handleCloseEditor = () => {
+    setShowEditorPopup(false);
+  };
+
+  const handleSaveEditor = (code) => {
+    setMermaidCode(code);
+    setShowEditorPopup(false);
+  };
+
+  const handleOpenDiagram = () => {
+    if (diagramPreviewRef.current && outputDivRef.current) {
+      diagramPreviewRef.current.innerHTML = outputDivRef.current.innerHTML;
+      setShowDiagramPopup(true);
+    }
+  };
+
+  const handleCloseDiagram = () => {
+    setShowDiagramPopup(false);
   };
 
   const handleExportSvg = () => {
-    exportSvg({
-      outputDivRef,
-      setErrorMessage
-    });
+    if (!outputDivRef.current) return;
+    const svgContent = outputDivRef.current.innerHTML;
+    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'diagram.svg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
-  const handleExportPng = () => {
-    exportPng({
-      outputDivRef,
-      setErrorMessage,
-      imageWidth,
-      imageHeight,
-      imageScale
-    });
-  };
+  const handleExportPng = async () => {
+    if (!outputDivRef.current) return;
+    const svg = outputDivRef.current.querySelector('svg');
+    if (!svg) return;
 
-  const openDiagramWindow = () => {
-    setIsDiagramPopupOpen(true);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
     
-    setTimeout(() => {
-      if (diagramPreviewRef.current) {
-        const currentDiagram = outputDivRef.current.innerHTML;
-        diagramPreviewRef.current.innerHTML = `<div class="diagram-container">${currentDiagram}</div>`;
-        setDiagramScale(1);
-      }
-    }, 0);
+    canvas.width = imageWidth * imageScale;
+    canvas.height = imageHeight * imageScale;
+    
+    const svgBlob = new Blob([svg.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const link = document.createElement('a');
+      link.download = 'diagram.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      URL.revokeObjectURL(url);
+    };
+    
+    img.src = url;
   };
 
-  const updateDiagramWindowScale = () => {
-    const container = diagramPreviewRef.current.querySelector('.diagram-container');
-    if (container) {
-      container.style.transform = `scale(${diagramScale})`;
+  const handleCopyImage = async () => {
+    if (!outputDivRef.current) return;
+    const svg = outputDivRef.current.querySelector('svg');
+    if (!svg) return;
+
+    try {
+      const svgString = new XMLSerializer().serializeToString(svg);
+      await navigator.clipboard.writeText(svgString);
+    } catch (err) {
+      console.error('Failed to copy image:', err);
     }
   };
-
-  const handleZoomIn = () => {
-    setDiagramScale(diagramScale + 0.1);
-    updateDiagramWindowScale();
-  };
-
-  const handleZoomOut = () => {
-    setDiagramScale(Math.max(0.1, diagramScale - 0.1));
-    updateDiagramWindowScale();
-  };
-
-  const handleDiagramCopy = () => {
-    const svgElement = diagramPreviewRef.current.querySelector('svg');
-    copyImageToClipboard(svgElement);
-  };
-
-  const handleOutputCopy = () => {
-    const svgElement = outputDivRef.current.querySelector('svg');
-    if (!svgElement) {
-      setErrorMessage('No diagram to copy. Please render a diagram first.');
-      return;
-    }
-    copyImageToClipboard(svgElement);
-  };
-
-  const handleOpenPopup = () => {
-    setIsPopupOpen(true);
-  };
-
-  const handleSavePopup = () => {
-    setIsPopupOpen(false);
-    renderDiagram();
-  };
-
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
-  };
-
-  const closeDiagramPopup = () => {
-    setIsDiagramPopupOpen(false);
-  };
-
-  // Handle escape key press
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        if (isPopupOpen) {
-          handleClosePopup();
-        }
-        if (isDiagramPopupOpen) {
-          closeDiagramPopup();
-        }
-      }
-    };
-  
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isPopupOpen, isDiagramPopupOpen]);
 
   return (
-    <div className="app-container" data-theme={theme}>
-      <Header 
-        theme={theme} 
-        handleThemeToggle={handleThemeToggle} 
-        handleTemplateChange={handleTemplateChange} 
-      />
-
-      <div className="container">
-        <InputSection 
-          mermaidCode={mermaidCode}
-          setMermaidCode={setMermaidCode}
-          renderDiagram={renderDiagram}
-          handleOpenPopup={handleOpenPopup}
-          loading={loading}
-          errorMessage={errorMessage}
-          imageWidth={imageWidth}
-          setImageWidth={setImageWidth}
-          imageHeight={imageHeight}
-          setImageHeight={setImageHeight}
-          imageScale={imageScale}
-          setImageScale={setImageScale}
-        />
-
-        <OutputSection 
-          outputDivRef={outputDivRef}
-          exportSvg={handleExportSvg}
-          exportPng={handleExportPng}
-          openDiagramWindow={openDiagramWindow}
-          handleCopyImage={handleOutputCopy}
-        />
+    <SaltProvider mode={mode}>
+      <div className="app-container">
+        <header className="app-header">
+          <div className="app-header-content">
+            <h1>Mermaid Diagram Editor</h1>
+          </div>
+        </header>
+        
+        <main className="container">
+          <InputSection 
+            mermaidCode={mermaidCode}
+            setMermaidCode={setMermaidCode}
+            loading={loading}
+            error={error}
+            handleOpenEditor={handleOpenEditor}
+            imageWidth={imageWidth}
+            setImageWidth={setImageWidth}
+            imageHeight={imageHeight}
+            setImageHeight={setImageHeight}
+            imageScale={imageScale}
+            setImageScale={setImageScale}
+            renderDiagram={renderDiagram}
+          />
+          
+          <OutputSection 
+            outputDivRef={outputDivRef}
+            handleExportSvg={handleExportSvg}
+            handleExportPng={handleExportPng}
+            handleOpenDiagram={handleOpenDiagram}
+            handleCopyImage={handleCopyImage}
+          />
+        </main>
+        
+        {showDiagramPopup && (
+          <DiagramPopup 
+            diagramPreviewRef={diagramPreviewRef}
+            handleClose={handleCloseDiagram}
+            handleCopyImage={handleCopyImage}
+          />
+        )}
+        
+        {showEditorPopup && (
+          <EditorPopup 
+            mermaidCode={mermaidCode}
+            handleSave={handleSaveEditor}
+            handleClose={handleCloseEditor}
+          />
+        )}
       </div>
-
-      {isPopupOpen && (
-        <EditorPopup 
-          mermaidCode={mermaidCode}
-          setMermaidCode={setMermaidCode}
-          handleSavePopup={handleSavePopup}
-          handleClosePopup={handleClosePopup}
-        />
-      )}
-
-      {isDiagramPopupOpen && (
-        <DiagramPopup 
-          diagramPreviewRef={diagramPreviewRef}
-          handleZoomIn={handleZoomIn}
-          handleZoomOut={handleZoomOut}
-          closeDiagramPopup={closeDiagramPopup}
-          handleCopyImage={handleDiagramCopy}
-        />
-      )}
-    </div>
+    </SaltProvider>
   );
 };
 
