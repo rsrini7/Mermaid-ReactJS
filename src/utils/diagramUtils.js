@@ -16,16 +16,25 @@ export const renderDiagramWithCode = ({ code, outputDivRef, setLoading, setError
   setErrorMessage('');
 
   try {
+    // Ensure mermaid is ready before rendering
+    mermaid.initialize({
+      startOnLoad: false, // We control rendering manually
+      theme: document.body.classList.contains('dark') ? 'dark' : 'default', // Example theme check
+      securityLevel: 'loose', // Important for allowing complex rendering
+    });
+
     mermaid.render('mermaid-svg', code).then(result => {
       if (outputDivRef.current) {
         outputDivRef.current.innerHTML = result.svg;
       }
       setLoading(false);
     }).catch(error => {
+      console.error("Mermaid Render Error:", error);
       setErrorMessage(`Error: ${error.message || 'Invalid Mermaid syntax'}`);
       setLoading(false);
     });
   } catch (error) {
+    console.error("Mermaid Init/Render Error:", error);
     setErrorMessage(`Error: ${error.message || 'Invalid Mermaid syntax'}`);
     setLoading(false);
   }
@@ -39,12 +48,13 @@ export const renderDiagramWithCode = ({ code, outputDivRef, setLoading, setError
  * @returns {void}
  */
 export const exportSvg = ({ outputDivRef, setErrorMessage }) => {
-  const svgElement = outputDivRef.current.querySelector('svg');
+  const svgElement = outputDivRef.current?.querySelector('svg');
 
   if (!svgElement) {
     setErrorMessage('No diagram to export. Please render a diagram first.');
     return;
   }
+  setErrorMessage(''); // Clear previous errors
 
   const svgData = new XMLSerializer().serializeToString(svgElement);
   const blob = new Blob([svgData], { type: 'image/svg+xml' });
@@ -52,83 +62,102 @@ export const exportSvg = ({ outputDivRef, setErrorMessage }) => {
 };
 
 /**
+ * Basic SVG Sanitizer: Removes foreignObject elements
+ * @param {string} svgString - The SVG string to sanitize
+ * @returns {string} - Sanitized SVG string
+ */
+const sanitizeSvgString = (svgString) => {
+  // Remove <foreignObject>...</foreignObject> tags and their content
+  // This is a common cause of canvas tainting
+  return svgString.replace(/<foreignObject[\s\S]*?<\/foreignObject>/g, '');
+};
+
+/**
  * Exports the diagram as PNG
  * @param {Object} params - Parameters for export
  * @param {Object} params.outputDivRef - Reference to output div
  * @param {Function} params.setErrorMessage - Function to set error message
- * @param {number} params.imageWidth - Width of the image
- * @param {number} params.imageHeight - Height of the image
+ * @param {number} params.imageWidth - Desired width (used if SVG has no width)
+ * @param {number} params.imageHeight - Desired height (used if SVG has no height)
  * @param {number} params.imageScale - Scale factor for the image
  * @returns {void}
  */
 export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeight, imageScale }) => {
-  const svgElement = outputDivRef.current.querySelector('svg');
+  const svgElement = outputDivRef.current?.querySelector('svg');
 
   if (!svgElement) {
     setErrorMessage('No diagram to export. Please render a diagram first.');
     return;
   }
-
-  const width = imageWidth;
-  const height = imageHeight;
-  const scale = imageScale;
+  setErrorMessage(''); // Clear previous errors
 
   try {
-    const svgData = new XMLSerializer().serializeToString(svgElement);
-    let sourceSVG = svgData;
-    if (!sourceSVG.includes('xmlns="http://www.w3.org/2000/svg"')) {
-      sourceSVG = sourceSVG.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
-    }
-    if (!sourceSVG.includes('xmlns:xlink="http://www.w3.org/1999/xlink"')) {
-      sourceSVG = sourceSVG.replace('<svg', '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
-    }
-    if (!svgElement.hasAttribute('width')) {
-      sourceSVG = sourceSVG.replace('<svg', `<svg width="${width}"`);
-    }
-    if (!svgElement.hasAttribute('height')) {
-      sourceSVG = sourceSVG.replace('<svg', `<svg height="${height}"`);
-    }
-
-    const base64Data = btoa(unescape(encodeURIComponent(sourceSVG)));
-    const dataUrl = `data:image/svg+xml;base64,${base64Data}`;
-
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
     const img = new Image();
-    img.width = width;
-    img.height = height;
 
-    img.onerror = () => {
-      setErrorMessage('Error loading SVG for PNG conversion.');
-    };
+    // Get dimensions from SVG, fallback to state, apply scale
+    const svgRect = svgElement.getBoundingClientRect();
+    const svgNaturalWidth = svgElement.width?.baseVal?.value || svgRect.width || imageWidth;
+    const svgNaturalHeight = svgElement.height?.baseVal?.value || svgRect.height || imageHeight;
+
+    const targetWidth = svgNaturalWidth * imageScale;
+    const targetHeight = svgNaturalHeight * imageScale;
+
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    // Serialize and sanitize SVG
+    let svgData = new XMLSerializer().serializeToString(svgElement);
+    svgData = sanitizeSvgString(svgData); // *** ADDED SANITIZATION STEP ***
+
+     // Ensure necessary namespaces for rendering in image/canvas
+    if (!svgData.includes('xmlns="http://www.w3.org/2000/svg"')) {
+      svgData = svgData.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    // Add width/height attributes if missing, using calculated natural size
+    if (!svgElement.hasAttribute('width') && !svgData.includes('width=')) {
+       svgData = svgData.replace('<svg', `<svg width="${svgNaturalWidth}"`);
+    }
+     if (!svgElement.hasAttribute('height') && !svgData.includes('height=')) {
+       svgData = svgData.replace('<svg', `<svg height="${svgNaturalHeight}"`);
+    }
+
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
 
     img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = width * scale;
-        canvas.height = height * scale;
+      // Draw white background first
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Draw the potentially sanitized SVG image onto the canvas
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url); // Clean up blob URL
 
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.scale(scale, scale);
-        ctx.drawImage(img, 0, 0, width, height);
-
-        canvas.toBlob((blob) => {
-          if (blob) {
-            downloadFile(blob, 'mermaid-diagram.png');
-          } else {
-            setErrorMessage('Failed to create PNG. The diagram might be too complex.');
-          }
-        }, 'image/png');
-      } catch (error) {
-        setErrorMessage(`Error creating PNG: ${error.message}`);
-      }
+      // Convert canvas to PNG Blob and download
+      canvas.toBlob((blob) => {
+        if (blob) {
+          downloadFile(blob, 'mermaid-diagram.png');
+        } else {
+          setErrorMessage('Failed to create PNG blob. The diagram might be too complex or browser issue.');
+        }
+      }, 'image/png');
     };
 
-    img.src = dataUrl;
+    img.onerror = (error) => {
+      console.error("Image load error for PNG export:", error);
+      setErrorMessage('Error loading sanitized SVG image for PNG conversion. Check console.');
+      URL.revokeObjectURL(url); // Clean up blob URL
+    };
+
+    img.src = url;
+
   } catch (error) {
-    setErrorMessage(`SVG processing error: ${error.message}`);
+    console.error("PNG Export Error:", error);
+    setErrorMessage(`Error exporting PNG: ${error.message}`);
   }
 };
+
 
 /**
  * Downloads a file
@@ -142,79 +171,111 @@ export const downloadFile = (blob, filename) => {
   document.body.appendChild(downloadLink);
   downloadLink.click();
   document.body.removeChild(downloadLink);
+  // Revoke URL after a short delay to ensure download starts
   setTimeout(() => URL.revokeObjectURL(downloadLink.href), 100);
 };
 
 /**
- * Copies the diagram to clipboard
- * @param {SVGElement} svgElement - The SVG element to copy
- * @returns {void}
+ * Copies the diagram image to clipboard as PNG
+ * @param {Object} params - Parameters
+ * @param {Object} params.outputDivRef - Reference to output div
+ * @param {Function} params.setErrorMessage - Function to set error message
+ * @returns {Promise<void>}
  */
-export const copyImageToClipboard = (svgElement) => {
-  if (!svgElement) return;
+export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) => {
+  const svgElement = outputDivRef.current?.querySelector('svg');
 
-  // Create a canvas element to draw the SVG
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  
-  // Set canvas dimensions with higher resolution
-  const svgRect = svgElement.getBoundingClientRect();
-  const scaleFactor = 2; // Increase resolution by 2x
-  canvas.width = svgRect.width * scaleFactor;
-  canvas.height = svgRect.height * scaleFactor;
-  
-  // Create an image from the SVG with proper namespaces
-  const img = new Image();
-  let svgData = new XMLSerializer().serializeToString(svgElement);
-  
-  // Ensure SVG has proper namespaces
-  if (!svgData.includes('xmlns="http://www.w3.org/2000/svg"')) {
-    svgData = svgData.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+  if (!svgElement) {
+    setErrorMessage('No diagram to copy. Please render a diagram first.');
+    return;
   }
-  if (!svgData.includes('xmlns:xlink="http://www.w3.org/1999/xlink"')) {
-    svgData = svgData.replace('<svg', '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+  setErrorMessage(''); // Clear previous errors
+
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    // Use higher resolution for copy
+    const scaleFactor = 2;
+    const svgRect = svgElement.getBoundingClientRect();
+    const svgNaturalWidth = svgElement.width?.baseVal?.value || svgRect.width || 800; // Default fallback width
+    const svgNaturalHeight = svgElement.height?.baseVal?.value || svgRect.height || 600; // Default fallback height
+
+    canvas.width = svgNaturalWidth * scaleFactor;
+    canvas.height = svgNaturalHeight * scaleFactor;
+
+    // Serialize and sanitize SVG
+    let svgData = new XMLSerializer().serializeToString(svgElement);
+    svgData = sanitizeSvgString(svgData); // *** ADDED SANITIZATION STEP ***
+
+    // Ensure necessary namespaces
+    if (!svgData.includes('xmlns="http://www.w3.org/2000/svg"')) {
+      svgData = svgData.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    // Add width/height attributes if missing
+    if (!svgElement.hasAttribute('width') && !svgData.includes('width=')) {
+       svgData = svgData.replace('<svg', `<svg width="${svgNaturalWidth}"`);
+    }
+     if (!svgElement.hasAttribute('height') && !svgData.includes('height=')) {
+       svgData = svgData.replace('<svg', `<svg height="${svgNaturalHeight}"`);
+    }
+
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    await new Promise((resolve, reject) => {
+      img.onload = () => {
+        // Draw white background and scaled image
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url); // Clean up blob URL
+
+        // Convert canvas to blob for clipboard
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            reject(new Error('Failed to create blob for clipboard.'));
+            return;
+          }
+          try {
+            // Use Clipboard API to write the blob
+            await navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': blob })
+            ]);
+            console.log('Diagram image copied to clipboard.');
+            // Optionally show a success message to the user via state update if needed
+            resolve();
+          } catch (clipboardError) {
+            console.error('Clipboard API error:', clipboardError);
+            reject(new Error('Failed to copy image to clipboard. Check browser permissions or support.'));
+          }
+        }, 'image/png'); // Specify PNG format
+      };
+
+      img.onerror = (error) => {
+        console.error("Image load error for clipboard copy:", error);
+        URL.revokeObjectURL(url); // Clean up blob URL
+        reject(new Error('Error loading sanitized SVG image for copying.'));
+      };
+      img.crossOrigin = "anonymous";
+      img.src = url;
+    });
+
+  } catch (error) {
+    console.error("Copy Image Error:", error);
+    setErrorMessage(error.message || 'Failed to copy image.');
+
+    // Fallback: Try copying SVG text if image copy fails
+    try {
+        let svgString = new XMLSerializer().serializeToString(svgElement);
+        svgString = sanitizeSvgString(svgString); // Sanitize fallback text too
+        await navigator.clipboard.writeText(svgString);
+        console.log('Sanitized SVG code copied to clipboard as fallback.');
+        setErrorMessage('Failed to copy as image, copied sanitized SVG code instead.');
+    } catch (textErr) {
+        console.error('Failed to copy SVG text as fallback:', textErr);
+        setErrorMessage('Failed to copy image or SVG text.'); // Keep the more specific error if available
+    }
   }
-  
-  // Add width and height if not present
-  if (!svgElement.hasAttribute('width')) {
-    svgData = svgData.replace('<svg', `<svg width="${svgRect.width}"`);
-  }
-  if (!svgElement.hasAttribute('height')) {
-    svgData = svgData.replace('<svg', `<svg height="${svgRect.height}"`);
-  }
-  
-  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(svgBlob);
-  
-  img.onload = () => {
-    // Draw white background and the image with higher resolution
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.scale(scaleFactor, scaleFactor);
-    ctx.drawImage(img, 0, 0);
-    
-    // Convert to blob with higher quality
-    canvas.toBlob(blob => {
-      try {
-        // Create a ClipboardItem and write to clipboard
-        const item = new ClipboardItem({ 'image/png': blob });
-        navigator.clipboard.write([item])
-          .then(() => {
-            alert('High-resolution diagram copied to clipboard!');
-          })
-          .catch(err => {
-            console.error('Failed to copy: ', err);
-            alert('Failed to copy diagram. See console for details.');
-          });
-      } catch (err) {
-        console.error('Clipboard API error: ', err);
-        alert('Your browser may not support copying images to clipboard.');
-      }
-    }, 'image/png', 1.0); // Use maximum quality (1.0)
-    
-    // Clean up
-    URL.revokeObjectURL(url);
-  };
-  
-  img.src = url;
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
 import './App.css';
@@ -8,53 +7,75 @@ import InputSection from './components/InputSection';
 import OutputSection from './components/OutputSection';
 import DiagramPopup from './components/DiagramPopup';
 import EditorPopup from './components/EditorPopup';
+// Import utility functions
+import { exportSvg, exportPng, copyImageToClipboard } from './utils/diagramUtils';
 
 const App = () => {
   const [mermaidCode, setMermaidCode] = useState(templates.flowchart);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // Use null for no error, string for error message
   const [showDiagramPopup, setShowDiagramPopup] = useState(false);
   const [showEditorPopup, setShowEditorPopup] = useState(false);
-  const [imageWidth, setImageWidth] = useState(800);
-  const [imageHeight, setImageHeight] = useState(600);
-  const [imageScale, setImageScale] = useState(1);
+  const [imageWidth, setImageWidth] = useState(800); // Default width
+  const [imageHeight, setImageHeight] = useState(600); // Default height
+  const [imageScale, setImageScale] = useState(1.5); // Default scale for PNG export
   const [mode, setMode] = useState('light');
   const [diagramZoom, setDiagramZoom] = useState(1);
   const [tempMermaidCode, setTempMermaidCode] = useState(mermaidCode);
-  const [previewSvgContent, setPreviewSvgContent] = useState(''); // State for SVG content
+  const [previewSvgContent, setPreviewSvgContent] = useState(''); // State for SVG content in popup
 
   const outputDivRef = useRef(null);
-  // diagramPreviewRef is now managed within DiagramPopup
 
+  // Initialize Mermaid on mode change
   useEffect(() => {
     mermaid.initialize({
-      startOnLoad: true,
+      startOnLoad: false, // We'll render manually
       theme: mode === 'light' ? 'default' : 'dark',
-      securityLevel: 'loose',
+      securityLevel: 'loose', // Allow scripts if needed, adjust as necessary
     });
-  }, [mode]);
+    // Re-render diagram if code exists and theme changes
+    if (mermaidCode && outputDivRef.current) {
+       renderDiagram();
+    }
+     // Add class to body for potential global dark mode styling
+    document.body.classList.toggle('dark', mode === 'dark');
+    document.body.classList.toggle('light', mode === 'light');
 
+  }, [mode]); // Rerun effect when mode changes
+
+  // Render diagram function using mermaid API
   const renderDiagram = async () => {
-    if (!outputDivRef.current) return;
-    
+    if (!outputDivRef.current || !mermaidCode) return;
+
+    setLoading(true);
+    setError(null); // Clear previous errors
+    outputDivRef.current.innerHTML = ''; // Clear previous diagram
+
     try {
-      setLoading(true);
-      setError(null); // Clear previous errors
-      outputDivRef.current.innerHTML = ''; // Clear previous diagram
-      
+      // Ensure mermaid is initialized (might be redundant but safe)
+       mermaid.initialize({
+         startOnLoad: false,
+         theme: mode === 'light' ? 'default' : 'dark',
+         securityLevel: 'loose',
+       });
       const { svg } = await mermaid.render('mermaid-diagram', mermaidCode);
       outputDivRef.current.innerHTML = svg;
     } catch (err) {
       console.error('Mermaid rendering error:', err);
-      setError(`Error rendering diagram: ${err.message}`);
-      outputDivRef.current.innerHTML = `<div class="error-message">Error rendering diagram: ${err.message}</div>`; // Show error in output
+      const errorMessage = `Error rendering diagram: ${err.message || 'Invalid Mermaid syntax'}`;
+      setError(errorMessage);
+      // Display error message directly in the output area
+      if (outputDivRef.current) {
+         outputDivRef.current.innerHTML = `<div class="error-message">${errorMessage}</div>`;
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // --- Editor Popup Handlers ---
   const handleOpenEditor = () => {
-    setTempMermaidCode(mermaidCode);
+    setTempMermaidCode(mermaidCode); // Load current code into temp state
     setShowEditorPopup(true);
   };
 
@@ -63,188 +84,84 @@ const App = () => {
   };
 
   const handleSaveEditorPopup = () => {
-    setMermaidCode(tempMermaidCode);
+    setMermaidCode(tempMermaidCode); // Save code from temp state
     setShowEditorPopup(false);
-    // Optionally, re-render the diagram after saving changes from the editor
-    // renderDiagram(); 
+    renderDiagram(); // Re-render the diagram with the updated code
   };
 
-  const handleOpenDiagram = async () => {
+  // --- Diagram Popup (Preview) Handlers ---
+   const handleOpenDiagram = async () => {
     setError(null); // Clear previous errors
 
-    // Ensure the diagram is rendered in the main output area first
+    // Ensure the diagram exists in the main output area
     if (!outputDivRef.current?.querySelector('svg')) {
-      await renderDiagram(); // Render if not present
-      // Check again after attempting to render
-      if (!outputDivRef.current?.querySelector('svg')) {
-        setError("Failed to generate diagram for preview.");
-        return;
-      }
+       // If not rendered yet, try rendering it first
+       await renderDiagram();
+       // Check again after attempting render
+       if (!outputDivRef.current?.querySelector('svg')) {
+         setError("Failed to generate diagram for preview. Render it first.");
+         return; // Exit if still no SVG
+       }
     }
 
     // Get the SVG content from the main output
     const svgContent = outputDivRef.current.innerHTML;
-
-    // Set the SVG content for the popup and show it
-    setPreviewSvgContent(svgContent);
-    setShowDiagramPopup(true);
+    setPreviewSvgContent(svgContent); // Set content for the popup
+    setShowDiagramPopup(true); // Show the popup
   };
 
   const handleCloseDiagram = () => {
     setShowDiagramPopup(false);
-    setDiagramZoom(1);
+    setDiagramZoom(1); // Reset zoom on close
   };
 
+  // --- Zoom Handlers for Diagram Popup ---
   const handleZoomIn = () => {
-    setDiagramZoom(prevZoom => Math.min(prevZoom + 0.1, 3));
+    setDiagramZoom(prevZoom => Math.min(prevZoom + 0.1, 3)); // Max zoom 3x
   };
 
   const handleZoomOut = () => {
-    setDiagramZoom(prevZoom => Math.max(prevZoom - 0.1, 0.1));
+    setDiagramZoom(prevZoom => Math.max(prevZoom - 0.1, 0.1)); // Min zoom 0.1x
   };
 
-  const handleExportSvg = () => {
-    if (!outputDivRef.current || !outputDivRef.current.querySelector('svg')) {
-      setError("Please render the diagram first before exporting.");
-      return;
-    }
-    setError(null);
-    const svgContent = outputDivRef.current.innerHTML;
-    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'diagram.svg';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  // --- Export and Copy Handlers (Using Utility Functions) ---
+  const handleExportSvgClick = () => {
+    exportSvg({ outputDivRef, setErrorMessage: setError });
   };
 
-  const handleExportPng = async () => {
-    if (!outputDivRef.current || !outputDivRef.current.querySelector('svg')) {
-      setError("Please render the diagram first before exporting.");
-      return;
-    }
-    setError(null);
-    const svg = outputDivRef.current.querySelector('svg');
-    
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    
-    // Use the dimensions from the SVG if available, otherwise fallback
-    const svgWidth = svg.getAttribute('width');
-    const svgHeight = svg.getAttribute('height');
-    const targetWidth = (svgWidth ? parseFloat(svgWidth) : imageWidth) * imageScale;
-    const targetHeight = (svgHeight ? parseFloat(svgHeight) : imageHeight) * imageScale;
-
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    
-    const svgBlob = new Blob([svg.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-
-    img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const link = document.createElement('a');
-      link.download = 'diagram.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      URL.revokeObjectURL(url);
-    };
-
-    img.onerror = (err) => {
-      console.error("Error loading SVG image for PNG export:", err);
-      setError("Error exporting PNG. Could not load SVG image.");
-      URL.revokeObjectURL(url);
-    }
-    
-    img.src = url;
+  const handleExportPngClick = () => {
+    exportPng({
+      outputDivRef,
+      setErrorMessage: setError,
+      imageWidth,  // Pass state values
+      imageHeight, // Pass state values
+      imageScale   // Pass state values
+    });
   };
 
-  const handleCopyImage = async () => {
-     if (!outputDivRef.current || !outputDivRef.current.querySelector('svg')) {
-      setError("Please render the diagram first before copying.");
-      return;
-    }
-    setError(null);
-    const svg = outputDivRef.current.querySelector('svg');
-
-    try {
-      // For copying as image (bitmap) to clipboard
-      const svgBlob = new Blob([svg.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
-      const img = new Image();
-
-      img.onload = async () => {
-          const canvas = document.createElement('canvas');
-          // Use SVG dimensions if available for better quality
-          const svgWidth = svg.getAttribute('width');
-          const svgHeight = svg.getAttribute('height');
-          canvas.width = svgWidth ? parseFloat(svgWidth) : img.width;
-          canvas.height = svgHeight ? parseFloat(svgHeight) : img.height;
-          
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob(async (blob) => {
-              try {
-                  await navigator.clipboard.write([
-                      new ClipboardItem({ 'image/png': blob })
-                  ]);
-                  console.log('Image copied to clipboard.');
-              } catch (copyError) {
-                  console.error('Failed to copy image blob:', copyError);
-                  setError('Failed to copy image to clipboard.');
-              } finally {
-                  URL.revokeObjectURL(url); // Clean up object URL
-              }
-          }, 'image/png');
-      };
-      img.onerror = (err) => {
-          console.error("Error loading SVG for copying:", err);
-          setError("Error preparing image for copying.");
-          URL.revokeObjectURL(url);
-      }
-      img.src = url;
-
-    } catch (err) {
-      console.error('Failed to copy image:', err);
-      setError('Failed to copy image. Browser might not support Clipboard API for images.');
-       // Fallback: copy SVG text
-       try {
-           const svgString = new XMLSerializer().serializeToString(svg);
-           await navigator.clipboard.writeText(svgString);
-           console.log('SVG code copied to clipboard as fallback.');
-           // Optionally notify user that SVG code was copied instead
-           // setError('Copied SVG code instead (image copy failed).'); 
-       } catch (textErr) {
-           console.error('Failed to copy SVG text:', textErr);
-           setError('Failed to copy image or SVG text.');
-       }
-    }
+  const handleCopyImageClick = () => {
+    copyImageToClipboard({ outputDivRef, setErrorMessage: setError });
   };
+
 
   return (
     <SaltProvider mode={mode}>
-      <div className="app-container">
+      <div className={`app-container ${mode}`}> {/* Apply mode class */}
         <header className="app-header">
           <div className="app-header-content">
             <h1>Mermaid Diagram Editor</h1>
-            {/* Basic theme toggle example */}
             <button onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}>
               Toggle Theme ({mode})
             </button>
           </div>
         </header>
-        
+
         <main className="container">
-          <InputSection 
+          <InputSection
             mermaidCode={mermaidCode}
             setMermaidCode={setMermaidCode}
             loading={loading}
-            errorMessage={error} // Pass error message to InputSection
+            errorMessage={error} // Pass error state
             handleOpenEditor={handleOpenEditor}
             imageWidth={imageWidth}
             setImageWidth={setImageWidth}
@@ -252,34 +169,36 @@ const App = () => {
             setImageHeight={setImageHeight}
             imageScale={imageScale}
             setImageScale={setImageScale}
-            renderDiagram={renderDiagram}
+            renderDiagram={renderDiagram} // Pass render function
           />
-          
-          <OutputSection 
+
+          <OutputSection
             outputDivRef={outputDivRef}
-            handleExportSvg={handleExportSvg}
-            handleExportPng={handleExportPng}
+            handleExportSvg={handleExportSvgClick} // Use updated handler
+            handleExportPng={handleExportPngClick} // Use updated handler
             handleOpenDiagram={handleOpenDiagram}
-            handleCopyImage={handleCopyImage}
+            handleCopyImage={handleCopyImageClick} // Use updated handler
             isLoading={loading} // Pass loading state
           />
         </main>
-        
+
+        {/* Diagram Preview Popup */}
         {showDiagramPopup && (
           <DiagramPopup
-            svgContent={previewSvgContent} // Pass SVG content as prop
+            svgContent={previewSvgContent} // Pass SVG content
             closeDiagramPopup={handleCloseDiagram}
             handleZoomIn={handleZoomIn}
             handleZoomOut={handleZoomOut}
-            handleCopyImage={handleCopyImage} // Pass copy handler
+            handleCopyImage={handleCopyImageClick} // Can reuse the main copy handler
             zoomLevel={diagramZoom}
           />
         )}
-        
+
+        {/* Mermaid Code Editor Popup */}
         {showEditorPopup && (
-          <EditorPopup 
+          <EditorPopup
             mermaidCode={tempMermaidCode}
-            setMermaidCode={setTempMermaidCode}
+            setMermaidCode={setTempMermaidCode} // Update temp code
             handleSavePopup={handleSaveEditorPopup}
             handleClosePopup={handleCloseEditorPopup}
           />
