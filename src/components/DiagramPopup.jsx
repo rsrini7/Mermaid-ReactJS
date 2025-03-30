@@ -10,6 +10,22 @@ const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPop
     }
   }, [svgContent]); // Dependency array ensures this runs when svgContent changes
 
+  // Add event listener for Escape key
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeDiagramPopup();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    
+    // Clean up the event listener when component unmounts
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [closeDiagramPopup]);
+
   return (
     <div className="popup diagram-popup">
       <div className="popup-content">
