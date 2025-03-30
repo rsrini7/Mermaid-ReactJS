@@ -108,5 +108,46 @@ A modern React-based web application for creating, editing, and managing Mermaid
 2. Install dependencies:
 ```bash
 npm install
+```
+
+## Technical Stack & Dependencies
+
+### Core Dependencies
+- **React** - Frontend framework
+- **Mermaid.js** - Diagram generation library
+- **Salt Design System** - UI component library
+  - Core components
+  - Theming support
+  - Icon system
+  - Lab components
+- **TanStack Router** - React routing solution
+
+### Development Dependencies
+- **Build Tools**:
+  - Webpack
+  - Webpack CLI
+  - Webpack Dev Server
+- **Babel Configuration**:
+  - Babel core and presets
+  - React and environment presets
+- **Testing Framework**:
+  - Vitest
+  - Jest
+  - React Testing Library
+  - JSDOM
+- **Style Processing**:
+  - CSS loaders and processors
+- **TypeScript Support**:
+  - TypeScript compiler
+  - React type definitions
+- **Asset Management**:
+  - File and URL loaders
+
+## Build Process
+
+The project uses Webpack for bundling and building. Here's how the build process works:
+
+### Development
+```bash
 npm start
 ```
