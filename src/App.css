@@ -217,7 +217,8 @@ button:disabled {
 }
 
 /* Specific Button Styles */
-.input-header button:first-of-type { /* Render button */
+/* Render Diagram button - Green */
+.input-header button:first-of-type {
   background-color: #27ae60;
   box-shadow: 0 2px 4px rgba(39, 174, 96, 0.2);
 }
@@ -227,35 +228,159 @@ button:disabled {
   box-shadow: 0 4px 8px rgba(39, 174, 96, 0.25);
 }
 
-.output-controls button {
+/* Open Editor and Open Diagram buttons - Purple */
+.input-header button:nth-of-type(2),
+.output-controls button:first-of-type {
+  background-color: #9b59b6;
+  box-shadow: 0 2px 4px rgba(155, 89, 182, 0.2);
+}
+
+.input-header button:nth-of-type(2):hover,
+.output-controls button:first-of-type:hover {
+  background-color: #8e44ad;
+  box-shadow: 0 4px 8px rgba(155, 89, 182, 0.25);
+}
+
+/* Copy Image button - Orange */
+.output-controls button:nth-of-type(2),
+.diagram-control-buttons .tooltip-wrapper:first-of-type button {
+  background-color: #f39c12;
+  box-shadow: 0 2px 4px rgba(243, 156, 18, 0.2);
+}
+
+.output-controls button:nth-of-type(2):hover,
+.diagram-control-buttons .tooltip-wrapper:first-of-type button:hover {
+  background-color: #e67e22;
+  box-shadow: 0 4px 8px rgba(243, 156, 18, 0.25);
+}
+
+/* Export SVG button - Blue */
+.output-controls button:nth-of-type(3) {
   background-color: #3498db;
   box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
 }
 
-.output-controls button:hover {
+.output-controls button:nth-of-type(3):hover {
   background-color: #2980b9;
   box-shadow: 0 4px 8px rgba(52, 152, 219, 0.25);
 }
 
-button.secondary {
-  background-color: #ecf0f1;
-  color: #2c3e50;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+/* Export PNG button - Teal */
+.output-controls button:nth-of-type(4) {
+  background-color: #1abc9c;
+  box-shadow: 0 2px 4px rgba(26, 188, 156, 0.2);
 }
 
-button.secondary:hover {
-  background-color: #dfe6e9;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.output-controls button:nth-of-type(4):hover {
+  background-color: #16a085;
+  box-shadow: 0 4px 8px rgba(26, 188, 156, 0.25);
 }
 
-button.danger {
-  background-color: #e74c3c;
-  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+/* Close buttons - Gray */
+.diagram-control-buttons button:last-of-type,
+.popup-header-buttons button:last-of-type {
+  background-color: #7f8c8d;
+  box-shadow: 0 2px 4px rgba(127, 140, 141, 0.2);
 }
 
-button.danger:hover {
-  background-color: #c0392b;
-  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.25);
+.diagram-control-buttons button:last-of-type:hover,
+.popup-header-buttons button:last-of-type:hover {
+  background-color: #95a5a6;
+  box-shadow: 0 4px 8px rgba(127, 140, 141, 0.25);
+}
+
+/* Save buttons - Green */
+.popup-header-buttons button:first-of-type {
+  background-color: #27ae60;
+  box-shadow: 0 2px 4px rgba(39, 174, 96, 0.2);
+}
+
+.popup-header-buttons button:first-of-type:hover {
+  background-color: #219653;
+  box-shadow: 0 4px 8px rgba(39, 174, 96, 0.25);
+}
+
+/* Toggle Theme button - Dark Blue */
+.app-header-content button {
+  background-color: #34495e;
+  box-shadow: 0 2px 4px rgba(52, 73, 94, 0.2);
+}
+
+.app-header-content button:hover {
+  background-color: #2c3e50;
+  box-shadow: 0 4px 8px rgba(52, 73, 94, 0.25);
+}
+
+/* Dark mode adjustments */
+[data-mode='dark'] .input-header button:first-of-type {
+  background-color: #27ae60;
+}
+
+[data-mode='dark'] .input-header button:first-of-type:hover {
+  background-color: #219653;
+}
+
+[data-mode='dark'] .input-header button:nth-of-type(2),
+[data-mode='dark'] .output-controls button:first-of-type {
+  background-color: #9b59b6;
+}
+
+[data-mode='dark'] .input-header button:nth-of-type(2):hover,
+[data-mode='dark'] .output-controls button:first-of-type:hover {
+  background-color: #8e44ad;
+}
+
+[data-mode='dark'] .output-controls button:nth-of-type(2),
+[data-mode='dark'] .diagram-control-buttons .tooltip-wrapper:first-of-type button {
+  background-color: #f39c12;
+}
+
+[data-mode='dark'] .output-controls button:nth-of-type(2):hover,
+[data-mode='dark'] .diagram-control-buttons .tooltip-wrapper:first-of-type button:hover {
+  background-color: #e67e22;
+}
+
+[data-mode='dark'] .output-controls button:nth-of-type(3) {
+  background-color: #3498db;
+}
+
+[data-mode='dark'] .output-controls button:nth-of-type(3):hover {
+  background-color: #2980b9;
+}
+
+[data-mode='dark'] .output-controls button:nth-of-type(4) {
+  background-color: #1abc9c;
+}
+
+[data-mode='dark'] .output-controls button:nth-of-type(4):hover {
+  background-color: #16a085;
+}
+
+[data-mode='dark'] .diagram-control-buttons button:last-of-type,
+[data-mode='dark'] .popup-header-buttons button:last-of-type {
+  background-color: #7f8c8d;
+}
+
+[data-mode='dark'] .diagram-control-buttons button:last-of-type:hover,
+[data-mode='dark'] .popup-header-buttons button:last-of-type:hover {
+  background-color: #95a5a6;
+}
+
+[data-mode='dark'] .popup-header-buttons button:first-of-type {
+  background-color: #27ae60;
+}
+
+[data-mode='dark'] .popup-header-buttons button:first-of-type:hover {
+  background-color: #219653;
+}
+
+[data-mode='dark'] .app-header-content button {
+  background-color: #34495e;
+  border: 1px solid #4a5568;
+}
+
+[data-mode='dark'] .app-header-content button:hover {
+  background-color: #2c3e50;
 }
 
 /* Popup Styles */
@@ -342,6 +467,7 @@ button.danger:hover {
   width: 90%;
   max-width: 1200px;
   height: 90%;
+  overflow: hidden; /* Ensure the popup itself doesn't scroll */
 }
 
 .diagram-controls {
@@ -362,7 +488,7 @@ button.danger:hover {
 
 .diagram-preview {
   flex-grow: 1;
-  overflow: auto;
+  overflow: auto; /* Enable both horizontal and vertical scrolling */
   background-color: #f9f9f9;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -371,12 +497,54 @@ button.danger:hover {
   align-items: center;
   transition: background-color 0.3s ease, border-color 0.3s ease;
   padding: 20px;
+  position: relative; /* Add positioning context */
+  min-height: 300px; /* Ensure minimum height */
+}
+
+.diagram-preview-container {
+  position: relative; /* For proper zoom handling */
+  min-width: 100px;
+  min-height: 100px;
+  /* transform-origin is set via inline style in the component */
 }
 
 .diagram-preview svg {
   display: block;
-  max-width: none;
-  max-height: none;
+  max-width: none; /* Allow SVG to exceed container for zooming */
+  max-height: none; /* Allow SVG to exceed container for zooming */
+}
+
+/* Add scrollbar styling for better appearance */
+.diagram-preview::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.diagram-preview::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.diagram-preview::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.diagram-preview::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Dark mode scrollbar styling */
+[data-mode='dark'] .diagram-preview::-webkit-scrollbar-track {
+  background: #2c3e50;
+}
+
+[data-mode='dark'] .diagram-preview::-webkit-scrollbar-thumb {
+  background: #4a5568;
+}
+
+[data-mode='dark'] .diagram-preview::-webkit-scrollbar-thumb:hover {
+  background: #718096;
 }
 
 /* Tooltip Styles */

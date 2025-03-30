@@ -2,14 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 
 const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPopup, handleCopyImage, zoomLevel }) => {
   const previewDivRef = useRef(null); // Local ref for the preview div
+  const previewContainerRef = useRef(null); // Ref for the inner container that will be scaled
   
   // Add state to track slider value
   const [sliderValue, setSliderValue] = useState(zoomLevel * 100);
 
   // Effect to update the preview content when svgContent changes or component mounts
   useEffect(() => {
-    if (previewDivRef.current && svgContent) {
-      previewDivRef.current.innerHTML = svgContent;
+    if (previewContainerRef.current && svgContent) {
+      previewContainerRef.current.innerHTML = svgContent;
     }
   }, [svgContent]); // Dependency array ensures this runs when svgContent changes
 
@@ -17,6 +18,28 @@ const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPop
   useEffect(() => {
     setSliderValue(zoomLevel * 100);
   }, [zoomLevel]);
+
+  // Effect to apply zoom level and center the content in the viewport
+  useEffect(() => {
+    if (previewContainerRef.current && previewDivRef.current) {
+      // Apply zoom transformation to the container
+      previewContainerRef.current.style.transform = `scale(${zoomLevel})`;
+      previewContainerRef.current.style.transformOrigin = 'top left';
+      
+      // Center the zoomed content in the viewport if it's smaller than the viewport
+      const containerRect = previewContainerRef.current.getBoundingClientRect();
+      const previewRect = previewDivRef.current.getBoundingClientRect();
+      
+      // If the zoomed content is smaller than the viewport, center it
+      if (containerRect.width * zoomLevel < previewRect.width) {
+        previewDivRef.current.scrollLeft = 0;
+      }
+      
+      if (containerRect.height * zoomLevel < previewRect.height) {
+        previewDivRef.current.scrollTop = 0;
+      }
+    }
+  }, [zoomLevel, svgContent]);
 
   // Add event listener for Escape key
   useEffect(() => {
@@ -40,8 +63,11 @@ const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPop
     setSliderValue(newValue);
     // Calculate the new zoom level (between 0.1 and 3)
     const newZoomLevel = newValue / 100;
-    // Update the diagram with the new zoom level
-    previewDivRef.current.style.transform = `scale(${newZoomLevel})`;
+    
+    // Update the container with the new zoom level
+    if (previewContainerRef.current) {
+      previewContainerRef.current.style.transform = `scale(${newZoomLevel})`;
+    }
   };
 
   return (
@@ -50,7 +76,6 @@ const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPop
         <div className="diagram-controls">
           <h2>Diagram Preview</h2>
           <div className="diagram-control-buttons">
-            {/* Replace + and - buttons with a slider */}
             <div className="zoom-slider-container">
               <span className="zoom-label">Zoom: {sliderValue}%</span>
               <input
@@ -72,13 +97,12 @@ const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPop
             </div>
           </div>
         </div>
-        {/* Apply zoom level using inline style */}
-        <div
-          className="diagram-preview"
-          ref={previewDivRef} // Use the local ref
-          style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
-        >
-          {/* Content is now set via useEffect */}
+        {/* The outer div handles scrolling */}
+        <div className="diagram-preview" ref={previewDivRef}>
+          {/* The inner container handles zoom transformation */}
+          <div className="diagram-preview-container" ref={previewContainerRef}>
+            {/* Content is set via useEffect */}
+          </div>
         </div>
       </div>
     </div>
