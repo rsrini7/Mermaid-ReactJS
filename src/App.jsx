@@ -177,9 +177,44 @@ const App = () => {
     });
   };
 
-  const handleCopyImageClick = () => {
-    copyImageToClipboard({ outputDivRef, setErrorMessage: setError });
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  // Update your handleCopyImage function
+  const handleCopyImageClick = async () => {
+    try {
+      await copyImageToClipboard({ 
+        outputDivRef, 
+        setErrorMessage: setError  // Change this to use setError instead
+      });
+      // Show success toast
+      setToast({ show: true, message: 'Image copied to clipboard!', type: 'success' });
+      
+      // Hide toast after 3 seconds
+      setTimeout(() => {
+        setToast({ show: false, message: '', type: 'success' });
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to copy image:', error);
+      setError('Failed to copy image to clipboard: ' + error.message);  // Change this to use setError
+      
+      // Show error toast
+      setToast({ show: true, message: 'Failed to copy image', type: 'error' });
+      
+      // Hide toast after 3 seconds
+      setTimeout(() => {
+        setToast({ show: false, message: '', type: 'error' });
+      }, 3000);
+    }
   };
+
+  // Add this to your JSX return, near the end before the closing tag
+  {toast.show && (
+    <div className="toast-container">
+      <div className={`toast ${toast.type}`}>
+        {toast.message}
+      </div>
+    </div>
+  )}
 
 
   return (
@@ -244,6 +279,15 @@ const App = () => {
             onClose={handleCloseEditorPopup}
             onSave={handleSaveEditorPopup}
           />
+        )}
+        
+        {/* Toast notification */}
+        {toast.show && (
+          <div className="toast-container">
+            <div className={`toast ${toast.type}`}>
+              {toast.message}
+            </div>
+          </div>
         )}
       </div>
     </SaltProvider>
