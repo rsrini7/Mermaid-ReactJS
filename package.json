@@ -1,5 +1,5 @@
 {
-  "name": "Mermaid",
+  "name": "mermaid-reactjs",
   "private": true,
   "scripts": {
     "start": "webpack serve --mode development",
