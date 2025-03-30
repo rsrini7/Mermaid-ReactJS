@@ -157,6 +157,11 @@ const App = () => {
     setDiagramZoom(prevZoom => Math.max(prevZoom - 0.1, 0.1)); // Min zoom 0.1x
   };
 
+  // Update the handleZoomIn and handleZoomOut functions to accept a specific zoom level
+  const handleZoomChange = (newZoomLevel) => {
+    setDiagramZoom(newZoomLevel);
+  };
+
   // --- Export and Copy Handlers (Using Utility Functions) ---
   const handleExportSvgClick = () => {
     exportSvg({ outputDivRef, setErrorMessage: setError });
@@ -221,11 +226,12 @@ const App = () => {
         {/* Diagram Preview Popup */}
         {showDiagramPopup && (
           <DiagramPopup
-            svgContent={previewSvgContent} // Pass SVG content
-            closeDiagramPopup={handleCloseDiagram}
+            svgContent={previewSvgContent}
             handleZoomIn={handleZoomIn}
             handleZoomOut={handleZoomOut}
-            handleCopyImage={handleCopyImageClick} // Can reuse the main copy handler
+            handleZoomChange={handleZoomChange} // Add this new prop
+            closeDiagramPopup={handleCloseDiagram}
+            handleCopyImage={handleCopyImageClick}
             zoomLevel={diagramZoom}
           />
         )}
