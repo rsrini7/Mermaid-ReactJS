@@ -12,6 +12,7 @@ import { exportSvg, exportPng, copyImageToClipboard } from './utils/diagramUtils
 
 const App = () => {
   const [mermaidCode, setMermaidCode] = useState(templates.flowchart);
+  const [selectedTemplate, setSelectedTemplate] = useState('flowchart');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null); // Use null for no error, string for error message
   const [showDiagramPopup, setShowDiagramPopup] = useState(false);
@@ -43,23 +44,55 @@ const App = () => {
 
   }, [mode]); // Rerun effect when mode changes
 
+  // Add this new effect to render on initial load with a slight delay
+  useEffect(() => {
+  // Use a small timeout to ensure DOM is ready
+  const timer = setTimeout(() => {
+    if (outputDivRef.current) {
+      renderDiagram();
+      console.log("Initial diagram rendered");
+    }
+  }, 100);
+  
+  return () => clearTimeout(timer);
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Effect to render diagram when mermaidCode changes
+  useEffect(() => {
+    if (mermaidCode && outputDivRef.current) {
+      renderDiagram();
+    }
+  }, [mermaidCode]); // Rerun effect when mermaidCode changes
+
+  // Handle template change
+  const handleTemplateChange = (templateKey) => {
+    setSelectedTemplate(templateKey);
+    setMermaidCode(templates[templateKey]);
+    // Rendering will be handled by the useEffect above when mermaidCode changes
+  };
+
   // Render diagram function using mermaid API
   const renderDiagram = async () => {
-    if (!outputDivRef.current || !mermaidCode) return;
-
+    if (!outputDivRef.current || !mermaidCode) {
+      console.log("Cannot render: outputDiv or mermaidCode not available");
+      return;
+    }
+  
     setLoading(true);
     setError(null); // Clear previous errors
     outputDivRef.current.innerHTML = ''; // Clear previous diagram
-
+  
     try {
       // Ensure mermaid is initialized (might be redundant but safe)
-       mermaid.initialize({
-         startOnLoad: false,
-         theme: mode === 'light' ? 'default' : 'dark',
-         securityLevel: 'loose',
-       });
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: mode === 'light' ? 'default' : 'dark',
+        securityLevel: 'loose',
+      });
       const { svg } = await mermaid.render('mermaid-diagram', mermaidCode);
-      outputDivRef.current.innerHTML = svg;
+      if (outputDivRef.current) { // Double-check ref is still valid
+        outputDivRef.current.innerHTML = svg;
+      }
     } catch (err) {
       console.error('Mermaid rendering error:', err);
       const errorMessage = `Error rendering diagram: ${err.message || 'Invalid Mermaid syntax'}`;
@@ -86,7 +119,7 @@ const App = () => {
   const handleSaveEditorPopup = () => {
     setMermaidCode(tempMermaidCode); // Save code from temp state
     setShowEditorPopup(false);
-    renderDiagram(); // Re-render the diagram with the updated code
+    // Rendering will be handled by the useEffect when mermaidCode changes
   };
 
   // --- Diagram Popup (Preview) Handlers ---
@@ -170,6 +203,9 @@ const App = () => {
             imageScale={imageScale}
             setImageScale={setImageScale}
             renderDiagram={renderDiagram} // Pass render function
+            templates={templates} // Pass templates object
+            selectedTemplate={selectedTemplate} // Pass selected template
+            onTemplateChange={handleTemplateChange} // Pass template change handler
           />
 
           <OutputSection
@@ -199,8 +235,8 @@ const App = () => {
           <EditorPopup
             mermaidCode={tempMermaidCode}
             setMermaidCode={setTempMermaidCode} // Update temp code
-            handleSavePopup={handleSaveEditorPopup}
-            handleClosePopup={handleCloseEditorPopup}
+            onClose={handleCloseEditorPopup}
+            onSave={handleSaveEditorPopup}
           />
         )}
       </div>

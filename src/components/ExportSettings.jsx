@@ -12,8 +12,8 @@ const ExportSettings = ({
     <div className="resolution-settings">
       <h3>Export Settings</h3>
       <div className="settings-inputs">
-        <div>
-          <label htmlFor="image-width">Width: </label>
+        <div className="setting-item">
+          <label htmlFor="image-width">Width:</label>
           <input 
             type="number" 
             id="image-width" 
@@ -22,8 +22,8 @@ const ExportSettings = ({
             min="100" 
           />
         </div>
-        <div>
-          <label htmlFor="image-height">Height: </label>
+        <div className="setting-item">
+          <label htmlFor="image-height">Height:</label>
           <input 
             type="number" 
             id="image-height" 
@@ -32,8 +32,8 @@ const ExportSettings = ({
             min="100" 
           />
         </div>
-        <div>
-          <label htmlFor="image-scale">Scale: </label>
+        <div className="setting-item">
+          <label htmlFor="image-scale">Scale:</label>
           <input 
             type="number" 
             id="image-scale" 

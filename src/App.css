@@ -302,19 +302,51 @@ button:disabled {
   padding: 5px 10px;
 }
 
-/* Export Settings Styles */
+/* Export Settings Styling - Compact Version */
 .export-settings {
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #eee;
+  margin: 10px 0;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.export-settings h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1rem;
-  color: #666;
+.resolution-settings {
+  margin: 10px 0;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
+  
+  .resolution-settings h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+  }
+  
+  .settings-inputs {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .setting-item {
+    display: flex;
+    align-items: center;
+  }
+  
+  .setting-item label {
+    margin-right: 2px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  
+  .setting-item input {
+    width: 60px;
+    padding: 4px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+  } 
 
 .export-settings div {
   display: flex;
@@ -333,6 +365,37 @@ button:disabled {
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+/* Template Selector Styles */
+.template-selector {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.template-selector label {
+  font-weight: 500;
+  color: #555;
+  min-width: 80px;
+}
+
+/* Style for Salt Dropdown when used in template selector */
+.template-selector .saltDropdown {
+  flex: 1;
+  max-width: 300px;
+}
+
+/* Fallback styling for regular select if Salt Dropdown is not used */
+.template-selector select {
+  flex: 1;
+  max-width: 300px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 0.9rem;
 }
 
 /* Dark Mode Styles (using SaltProvider context) */
