@@ -262,8 +262,47 @@ export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) =>
   setErrorMessage(''); // Clear previous errors
 
   try {
+    // Create a deep clone of the SVG to avoid modifying the original
+    const svgClone = svgElement.cloneNode(true);
+    
+    // Apply computed styles to all elements in the SVG clone
+    const allElements = svgClone.querySelectorAll('*');
+    allElements.forEach(element => {
+      if (element.nodeType === 1) { // Check if it's an element node
+        const computedStyle = window.getComputedStyle(svgElement.querySelector(`[id="${element.id}"]`) || element);
+        const importantStyles = [
+          'font-family', 'font-size', 'font-weight', 'fill', 'stroke', 
+          'stroke-width', 'stroke-dasharray', 'opacity', 'text-anchor'
+        ];
+        
+        importantStyles.forEach(style => {
+          const value = computedStyle.getPropertyValue(style);
+          if (value && value !== '') {
+            element.style[style] = value;
+          }
+        });
+      }
+    });
+    
+    // Specifically handle text elements to ensure they render correctly
+    svgClone.querySelectorAll('text').forEach(textEl => {
+      // Ensure text elements have font attributes
+      if (!textEl.style.fontFamily && !textEl.getAttribute('font-family')) {
+        textEl.setAttribute('font-family', 'Arial, Helvetica, sans-serif');
+      }
+      if (!textEl.style.fontSize && !textEl.getAttribute('font-size')) {
+        textEl.setAttribute('font-size', '12px');
+      }
+      if (!textEl.style.fontWeight && !textEl.getAttribute('font-weight')) {
+        textEl.setAttribute('font-weight', 'normal');
+      }
+      if (!textEl.style.fill && !textEl.getAttribute('fill')) {
+        textEl.setAttribute('fill', '#000000');
+      }
+    });
+
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     const img = new Image();
 
     // Use higher resolution for copy
@@ -275,32 +314,49 @@ export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) =>
     canvas.width = svgNaturalWidth * scaleFactor;
     canvas.height = svgNaturalHeight * scaleFactor;
 
-    // Serialize and sanitize SVG
-    let svgData = new XMLSerializer().serializeToString(svgElement);
-    svgData = sanitizeSvgString(svgData); // *** ADDED SANITIZATION STEP ***
-
-    // Ensure necessary namespaces
+    // Serialize SVG with proper styling
+    let svgData = new XMLSerializer().serializeToString(svgClone);
+    
+    // Ensure SVG has proper namespaces
     if (!svgData.includes('xmlns="http://www.w3.org/2000/svg"')) {
       svgData = svgData.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
     }
-    // Add width/height attributes if missing
-    if (!svgElement.hasAttribute('width') && !svgData.includes('width=')) {
-       svgData = svgData.replace('<svg', `<svg width="${svgNaturalWidth}"`);
+    if (!svgData.includes('xmlns:xlink')) {
+      svgData = svgData.replace('<svg', '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
     }
-     if (!svgElement.hasAttribute('height') && !svgData.includes('height=')) {
-       svgData = svgData.replace('<svg', `<svg height="${svgNaturalHeight}"`);
+    
+    // Add XML declaration for better rendering
+    svgData = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + svgData;
+    
+    // Explicitly set width/height in the SVG
+    if (svgData.includes('width=')) {
+      svgData = svgData.replace(/width="[^"]*"/, `width="${svgNaturalWidth}"`);
+    } else {
+      svgData = svgData.replace('<svg', `<svg width="${svgNaturalWidth}"`);
+    }
+    
+    if (svgData.includes('height=')) {
+      svgData = svgData.replace(/height="[^"]*"/, `height="${svgNaturalHeight}"`);
+    } else {
+      svgData = svgData.replace('<svg', `<svg height="${svgNaturalHeight}"`);
     }
 
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
+    // Use a data URL approach with proper encoding
+    const svgUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
 
     await new Promise((resolve, reject) => {
       img.onload = () => {
         // Draw white background and scaled image
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Set text rendering options for better quality
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.textRendering = 'optimizeLegibility';
+        
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url); // Clean up blob URL
+        URL.revokeObjectURL(svgUrl); // Clean up blob URL
 
         // Convert canvas to blob for clipboard
         canvas.toBlob(async (blob) => {
@@ -320,32 +376,19 @@ export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) =>
             console.error('Clipboard API error:', clipboardError);
             reject(new Error('Failed to copy image to clipboard. Check browser permissions or support.'));
           }
-        }, 'image/png'); // Specify PNG format
+        }, 'image/png', 1.0); // Specify PNG format with highest quality
       };
 
       img.onerror = (error) => {
         console.error("Image load error for clipboard copy:", error);
-        URL.revokeObjectURL(url); // Clean up blob URL
-        reject(new Error('Error loading sanitized SVG image for copying.'));
+        URL.revokeObjectURL(svgUrl);
+        reject(new Error('Failed to load SVG for clipboard copy.'));
       };
-      img.crossOrigin = "anonymous";
-      img.src = url;
+
+      img.src = svgUrl;
     });
-
   } catch (error) {
-    console.error("Copy Image Error:", error);
-    setErrorMessage(error.message || 'Failed to copy image.');
-
-    // Fallback: Try copying SVG text if image copy fails
-    try {
-        let svgString = new XMLSerializer().serializeToString(svgElement);
-        svgString = sanitizeSvgString(svgString); // Sanitize fallback text too
-        await navigator.clipboard.writeText(svgString);
-        console.log('Sanitized SVG code copied to clipboard as fallback.');
-        setErrorMessage('Failed to copy as image, copied sanitized SVG code instead.');
-    } catch (textErr) {
-        console.error('Failed to copy SVG text as fallback:', textErr);
-        setErrorMessage('Failed to copy image or SVG text.'); // Keep the more specific error if available
-    }
+    console.error('Copy to clipboard error:', error);
+    setErrorMessage(`Failed to copy diagram: ${error.message || 'Unknown error'}`);
   }
 };
