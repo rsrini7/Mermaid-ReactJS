@@ -88,7 +88,7 @@ const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPop
               />
             </div>
             <div className="tooltip-wrapper">
-              <button onClick={handleCopyImage}>Copy Image</button>
+              <button onClick={handleCopyImage} className="copy-image-btn">Copy Image</button>
               <span className="tooltip-text">Copy to Clipboard</span>
             </div>
             <div className="tooltip-wrapper">
