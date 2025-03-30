@@ -81,7 +81,7 @@ const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPop
               <input
                 type="range"
                 min="10"
-                max="300"
+                max="400"
                 value={sliderValue}
                 onChange={handleSliderChange}
                 className="zoom-slider"
