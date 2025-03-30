@@ -95,22 +95,39 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
     // Create a deep clone of the SVG to avoid modifying the original
     const svgClone = svg.cloneNode(true);
     
-    // Preserve all styling by embedding CSS
-    const styles = document.querySelectorAll('style');
-    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    styles.forEach(style => {
-      defs.appendChild(style.cloneNode(true));
+    // Apply computed styles to all elements in the SVG clone
+    const allElements = svgClone.querySelectorAll('*');
+    allElements.forEach(element => {
+      if (element.nodeType === 1) { // Check if it's an element node
+        const computedStyle = window.getComputedStyle(svg.querySelector(`[id="${element.id}"]`) || element);
+        const importantStyles = [
+          'font-family', 'font-size', 'font-weight', 'fill', 'stroke', 
+          'stroke-width', 'stroke-dasharray', 'opacity', 'text-anchor'
+        ];
+        
+        importantStyles.forEach(style => {
+          const value = computedStyle.getPropertyValue(style);
+          if (value && value !== '') {
+            element.style[style] = value;
+          }
+        });
+      }
     });
-    svgClone.insertBefore(defs, svgClone.firstChild);
     
-    // Ensure all text elements have proper font attributes
+    // Specifically handle text elements to ensure they render correctly
     svgClone.querySelectorAll('text').forEach(textEl => {
-      if (!textEl.getAttribute('font-family')) {
+      // Ensure text elements have font attributes
+      if (!textEl.style.fontFamily && !textEl.getAttribute('font-family')) {
         textEl.setAttribute('font-family', 'Arial, Helvetica, sans-serif');
       }
-      // Preserve existing font sizes
-      if (!textEl.getAttribute('font-size') && !textEl.style.fontSize) {
+      if (!textEl.style.fontSize && !textEl.getAttribute('font-size')) {
         textEl.setAttribute('font-size', '12px');
+      }
+      if (!textEl.style.fontWeight && !textEl.getAttribute('font-weight')) {
+        textEl.setAttribute('font-weight', 'normal');
+      }
+      if (!textEl.style.fill && !textEl.getAttribute('fill')) {
+        textEl.setAttribute('fill', '#000000');
       }
     });
     
@@ -128,7 +145,8 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
     // Add XML declaration for better rendering
     svgData = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + svgData;
     
-    // Calculate dimensions - use viewBox if available for better accuracy
+    // Calculate dimensions - use the provided export settings
+    // If SVG has dimensions, use them as a base, otherwise use the provided settings
     let svgWidth, svgHeight;
     const viewBox = svg.getAttribute('viewBox');
     if (viewBox) {
@@ -140,15 +158,21 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
       svgHeight = svg.getAttribute('height') || svg.getBoundingClientRect().height;
     }
     
-    const targetWidth = Math.round((svgWidth ? parseFloat(svgWidth) : imageWidth) * imageScale);
-    const targetHeight = Math.round((svgHeight ? parseFloat(svgHeight) : imageHeight) * imageScale);
+    // Use the provided settings if available, otherwise use SVG dimensions
+    const targetWidth = Math.round((imageWidth || parseFloat(svgWidth)) * imageScale);
+    const targetHeight = Math.round((imageHeight || parseFloat(svgHeight)) * imageScale);
     
-    // Add width/height if missing
-    if (!svgData.includes('width=')) {
-      svgData = svgData.replace('<svg', `<svg width="${svgWidth || imageWidth}"`);
+    // Explicitly set width/height in the SVG
+    if (svgData.includes('width=')) {
+      svgData = svgData.replace(/width="[^"]*"/, `width="${imageWidth || svgWidth}"`);
+    } else {
+      svgData = svgData.replace('<svg', `<svg width="${imageWidth || svgWidth}"`);
     }
-    if (!svgData.includes('height=')) {
-      svgData = svgData.replace('<svg', `<svg height="${svgHeight || imageHeight}"`);
+    
+    if (svgData.includes('height=')) {
+      svgData = svgData.replace(/height="[^"]*"/, `height="${imageHeight || svgHeight}"`);
+    } else {
+      svgData = svgData.replace('<svg', `<svg height="${imageHeight || svgHeight}"`);
     }
     
     // Use a data URL approach with proper encoding
@@ -162,7 +186,7 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
       const canvas = document.createElement('canvas');
       canvas.width = targetWidth;
       canvas.height = targetHeight;
-      const ctx = canvas.getContext('2d', { alpha: false });
+      const ctx = canvas.getContext('2d', { alpha: true });
       
       // Draw white background
       ctx.fillStyle = 'white';
@@ -171,6 +195,7 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
       // Set text rendering options for better quality
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
+      ctx.textRendering = 'optimizeLegibility';
       
       // Draw the image
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -198,7 +223,6 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
     };
     
     img.src = svgUrl;
-    
   } catch (err) {
     console.error('Failed to export PNG:', err);
     setErrorMessage('Failed to export PNG: ' + (err.message || 'Unknown error'));
