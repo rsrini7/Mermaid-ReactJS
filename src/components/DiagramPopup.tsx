@@ -73,34 +73,34 @@ const DiagramPopup: React.FC<DiagramPopupProps> = ({ svgContent, closeDiagramPop
   };
 
   return (
-    <div className="popup diagram-popup">
-      <div className="popup-content">
-        <div className="diagram-controls">
+    <div className="dia-popup dia-diagram-popup">
+      <div className="dia-popup-content">
+        <div className="dia-diagram-controls">
           <h2>Diagram Preview</h2>
-          <div className="diagram-control-buttons">
-            <div className="zoom-slider-container">
-              <span className="zoom-label">Zoom: {sliderValue}%</span>
+          <div className="dia-diagram-control-buttons">
+            <div className="dia-zoom-slider-container">
+              <span className="dia-zoom-label">Zoom: {sliderValue}%</span>
               <input
                 type="range"
                 min="10"
                 max="400"
                 value={sliderValue}
                 onChange={handleSliderChange}
-                className="zoom-slider"
+                className="dia-zoom-slider"
               />
             </div>
-            <div className="tooltip-wrapper">
-              <button onClick={handleCopyImage} className="copy-image-btn">Copy Image</button>
-              <span className="tooltip-text">Copy to Clipboard</span>
+            <div className="dia-tooltip-wrapper">
+              <button onClick={handleCopyImage} className="dia-btn dia-copy-image-btn">Copy Image</button>
+              <span className="dia-tooltip-text">Copy to Clipboard</span>
             </div>
-            <div className="tooltip-wrapper">
-              <button onClick={closeDiagramPopup}>Close</button>
-              <span className="tooltip-text">Close Preview</span>
+            <div className="dia-tooltip-wrapper">
+              <button className="dia-btn" onClick={closeDiagramPopup}>Close</button>
+              <span className="dia-tooltip-text">Close Preview</span>
             </div>
           </div>
         </div>
-        <div className="diagram-preview" ref={previewDivRef}>
-          <div className="diagram-preview-container" ref={previewContainerRef}>
+        <div className="dia-diagram-preview" ref={previewDivRef}>
+          <div className="dia-diagram-preview-container" ref={previewContainerRef}>
           </div>
         </div>
       </div>

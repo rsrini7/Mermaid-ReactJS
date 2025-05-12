@@ -45,18 +45,18 @@ const InputSection: React.FC<InputSectionProps> = ({
   const selectedOption = templateOptions.find(option => option.value === selectedTemplate);
 
   return (
-    <div className="input-section">
-      <div className="input-header">
+    <div className="dia-input-section">
+      <div className="dia-input-header">
         <h2>Mermaid Syntax</h2>
         <div>
-          <button onClick={renderDiagram} disabled={loading}>
+          <button className="dia-btn" onClick={renderDiagram} disabled={loading}>
             {loading ? 'Rendering...' : 'Render Diagram'}
           </button>
-          <button onClick={handleOpenEditor} disabled={loading}>Open Editor</button>
+          <button className="dia-btn" onClick={handleOpenEditor} disabled={loading}>Open Editor</button>
         </div>
       </div>
       
-      <div className="template-selector">
+      <div className="dia-template-selector">
         <label htmlFor="template-dropdown">Template:</label>
         <select
           id="template-dropdown"
@@ -73,20 +73,20 @@ const InputSection: React.FC<InputSectionProps> = ({
       </div>
       
       <textarea
-        className="mermaid-textarea"
+        className="dia-mermaid-textarea"
         value={mermaidCode}
         onChange={(e) => setMermaidCode(e.target.value)}
         placeholder="Enter your Mermaid diagram syntax here..."
         readOnly={loading} // Prevent editing while rendering
       />
       {/* Display error message below textarea */}
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
+      {errorMessage && <div className="dia-error-message">{errorMessage}</div>}
 
-      <div className="export-settings">
+      <div className="dia-export-settings">
         <h3>Export Settings</h3>
-        <div className="export-settings-container">
-          <div className="export-settings-row">
-            <div className="export-setting-item">
+        <div className="dia-export-settings-container">
+          <div className="dia-export-settings-row">
+            <div className="dia-export-setting-item">
               <label htmlFor="image-width">Width:</label>
               <input
                 id="image-width"
@@ -97,7 +97,7 @@ const InputSection: React.FC<InputSectionProps> = ({
                 max="3000"
               />
             </div>
-            <div className="export-setting-item">
+            <div className="dia-export-setting-item">
               <label htmlFor="image-height">Height:</label>
               <input
                 id="image-height"
@@ -108,7 +108,7 @@ const InputSection: React.FC<InputSectionProps> = ({
                 max="3000"
               />
             </div>
-            <div className="export-setting-item">
+            <div className="dia-export-setting-item">
               <label htmlFor="image-scale">Scale:</label>
               <input
                 id="image-scale"

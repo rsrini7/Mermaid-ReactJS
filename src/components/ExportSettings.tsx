@@ -18,10 +18,10 @@ const ExportSettings: React.FC<ExportSettingsProps> = ({
   setImageScale
 }) => {
   return (
-    <div className="resolution-settings">
+    <div className="dia-resolution-settings">
       <h3>Export Settings</h3>
-      <div className="settings-inputs">
-        <div className="setting-item">
+      <div className="dia-settings-inputs">
+        <div className="dia-setting-item">
           <label htmlFor="image-width">Width:</label>
           <input 
             type="number" 
@@ -31,7 +31,7 @@ const ExportSettings: React.FC<ExportSettingsProps> = ({
             min="100" 
           />
         </div>
-        <div className="setting-item">
+        <div className="dia-setting-item">
           <label htmlFor="image-height">Height:</label>
           <input 
             type="number" 
@@ -41,7 +41,7 @@ const ExportSettings: React.FC<ExportSettingsProps> = ({
             min="100" 
           />
         </div>
-        <div className="setting-item">
+        <div className="dia-setting-item">
           <label htmlFor="image-scale">Scale:</label>
           <input 
             type="number" 

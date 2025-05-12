@@ -10,8 +10,8 @@ const Header: React.FC<HeaderProps> = ({ theme, handleThemeToggle, handleTemplat
   return (
     <>
       <h1>Mermaid Diagram Generator</h1>
-      <div className="controls">
-        <div className="template-section">
+      <div className="dia-controls">
+        <div className="dia-template-section">
           <label htmlFor="template-select">Select Template: </label>
           <select id="template-select" name="template-select" onChange={handleTemplateChange} defaultValue="flowchart">
             <option value="">-- Select a diagram type --</option>
@@ -62,13 +62,13 @@ const Header: React.FC<HeaderProps> = ({ theme, handleThemeToggle, handleTemplat
             </optgroup>
           </select>
         </div>
-        <div className="theme-toggle">
-          <span className="theme-icon">☀️</span>
-          <label className="switch">
+        <div className="dia-theme-toggle">
+          <span className="dia-theme-icon">☀️</span>
+          <label className="dia-switch">
             <input type="checkbox" checked={theme === 'dark'} onChange={handleThemeToggle} />
-            <span className="slider"></span>
+            <span className="dia-slider"></span>
           </label>
-          <span className="theme-icon">🌙</span>
+          <span className="dia-theme-icon">🌙</span>
         </div>
       </div>
     </>

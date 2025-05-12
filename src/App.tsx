@@ -201,8 +201,8 @@ const App = () => {
 
   // Add this to your JSX return, near the end before the closing tag
   {toast.show && (
-    <div className="toast-container">
-      <div className={`toast ${toast.type}`}>
+    <div className="dia-toast-container">
+      <div className={`dia-toast ${toast.type}`}>
         {toast.message}
       </div>
     </div>
@@ -211,17 +211,17 @@ const App = () => {
 
   return (
     <SaltProvider mode={mode}>
-      <div className={`app-container ${mode}`}> {/* Apply mode class */}
-        <header className="app-header">
-          <div className="app-header-content">
+      <div className={`dia-app-container ${mode}`}> {/* Apply mode class */}
+        <header className="dia-app-header">
+          <div className="dia-app-header-content">
             <h1>Mermaid Diagram Editor</h1>
-            <button onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}>
+            <button className="dia-btn" onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}>
               Toggle Theme ({mode})
             </button>
           </div>
         </header>
 
-        <main className="container">
+        <main className="dia-container">
           <InputSection
             mermaidCode={mermaidCode}
             setMermaidCode={setMermaidCode}
@@ -273,8 +273,8 @@ const App = () => {
         
         {/* Toast notification */}
         {toast.show && (
-          <div className="toast-container">
-            <div className={`toast ${toast.type}`}>
+          <div className="dia-toast-container">
+            <div className={`dia-toast ${toast.type}`}>
               {toast.message}
             </div>
           </div>

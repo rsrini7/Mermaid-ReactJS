@@ -25,17 +25,17 @@ const EditorPopup: React.FC<EditorPopupProps> = ({ mermaidCode, setMermaidCode, 
   }, [onClose]);
 
   return (
-    <div className="popup editor-popup">
-      <div className="popup-content">
-        <div className="popup-header">
+    <div className="dia-popup dia-editor-popup">
+      <div className="dia-popup-content">
+        <div className="dia-popup-header">
           <h2>Edit Mermaid Syntax</h2>
-          <div className="popup-header-buttons">
-            <button onClick={onSave}>Save and Close</button>
-            <button onClick={onClose}>Close Without Saving</button> {/* This button uses onClose */}
+          <div className="dia-popup-header-buttons">
+            <button className="dia-btn" onClick={onSave}>Save and Close</button>
+            <button className="dia-btn" onClick={onClose}>Close Without Saving</button> {/* This button uses onClose */}
           </div>
         </div>
         <textarea
-          className="popup-textarea"
+          className="dia-popup-textarea"
           value={mermaidCode}
           onChange={(e) => setMermaidCode(e.target.value)}
         />

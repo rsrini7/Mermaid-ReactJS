@@ -18,20 +18,20 @@ const OutputSection: React.FC<OutputSectionProps> = ({
   isLoading
 }) => {
   return (
-    <div className="output-section">
-      <div className="output-header">
+    <div className="dia-output-section">
+      <div className="dia-output-header">
         <h2>Output Diagram</h2>
-        <div className="output-controls">
-          <button onClick={handleOpenDiagram} disabled={isLoading}>Open Diagram</button>
-          <button onClick={handleCopyImage} disabled={isLoading}>Copy Image</button>
-          <button onClick={handleExportSvg} disabled={isLoading}>Export SVG</button>
-          <button onClick={handleExportPng} disabled={isLoading}>Export PNG</button>
+        <div className="dia-output-controls">
+          <button className="dia-btn" onClick={handleOpenDiagram} disabled={isLoading}>Open Diagram</button>
+          <button className="dia-btn" onClick={handleCopyImage} disabled={isLoading}>Copy Image</button>
+          <button className="dia-btn" onClick={handleExportSvg} disabled={isLoading}>Export SVG</button>
+          <button className="dia-btn" onClick={handleExportPng} disabled={isLoading}>Export PNG</button>
         </div>
       </div>
-      {isLoading && <div className="loading-indicator">Rendering Diagram...</div>}
+      {isLoading && <div className="dia-loading-indicator">Rendering Diagram...</div>}
       <div 
         ref={outputDivRef} 
-        className={`mermaid-output-container ${isLoading ? 'loading' : ''}`}
+        className={`dia-mermaid-output-container ${isLoading ? 'loading' : ''}`}
       >
       </div>
     </div>
