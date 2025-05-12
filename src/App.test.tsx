@@ -68,7 +68,7 @@ describe('App Component', () => {
     
     fireEvent.change(textarea, { target: { value: 'graph TD\nA-->B' } });
     
-    expect(textarea.value).toBe('graph TD\nA-->B');
+    expect((textarea as HTMLTextAreaElement).value).toBe('graph TD\nA-->B');
   });
 
   test('opens editor popup when "Open Editor" button is clicked', () => {
@@ -117,8 +117,8 @@ describe('App Component', () => {
     fireEvent.change(heightInput, { target: { value: '1000' } });
     fireEvent.change(scaleInput, { target: { value: '3' } });
     
-    expect(widthInput.value).toBe('1500');
-    expect(heightInput.value).toBe('1000');
-    expect(scaleInput.value).toBe('3');
+    expect((widthInput as HTMLInputElement).value).toBe('1500');
+    expect((heightInput as HTMLInputElement).value).toBe('1000');
+    expect((scaleInput as HTMLInputElement).value).toBe('3');
   });
 });

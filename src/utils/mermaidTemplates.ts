@@ -1,4 +1,8 @@
-const templates = {
+interface MermaidTemplates {
+  [key: string]: string;
+}
+
+const templates: MermaidTemplates = {
     flowchart: `graph TD
     A[Start] --> B{Is it working?}
     B -->|Yes| C[Great!]

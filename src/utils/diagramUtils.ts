@@ -2,53 +2,60 @@
  * Utility functions for diagram operations
  */
 
+interface RenderDiagramParams {
+  code: string;
+  outputDivRef: React.RefObject<HTMLDivElement>;
+  setLoading: (loading: boolean) => void;
+  setErrorMessage: (message: string) => void;
+  mermaid: typeof import('mermaid');
+}
+
 /**
  * Renders a diagram with the provided mermaid code
- * @param {Object} params - Parameters for rendering
- * @param {string} params.code - Mermaid syntax code
- * @param {Object} params.outputDivRef - Reference to output div
- * @param {Function} params.setLoading - Function to set loading state
- * @param {Function} params.setErrorMessage - Function to set error message
- * @param {Object} params.mermaid - Mermaid library instance
  */
-export const renderDiagramWithCode = ({ code, outputDivRef, setLoading, setErrorMessage, mermaid }) => {
+export const renderDiagramWithCode = ({ code, outputDivRef, setLoading, setErrorMessage, mermaid }: RenderDiagramParams) => {
   setLoading(true);
   setErrorMessage('');
 
   try {
     // Ensure mermaid is ready before rendering
-    mermaid.initialize({
+    mermaid.default.initialize({
       startOnLoad: false, // We control rendering manually
       theme: document.body.classList.contains('dark') ? 'dark' : 'default', // Example theme check
       securityLevel: 'loose', // Important for allowing complex rendering
     });
 
-    mermaid.render('mermaid-svg', code).then(result => {
-      if (outputDivRef.current) {
-        outputDivRef.current.innerHTML = result.svg;
-      }
-      setLoading(false);
-    }).catch(error => {
-      console.error("Mermaid Render Error:", error);
-      setErrorMessage(`Error: ${error.message || 'Invalid Mermaid syntax'}`);
-      setLoading(false);
+    new Promise<void>((resolve) => {
+      mermaid.default.render('mermaid-svg', code).then(result => {
+        if (outputDivRef.current) {
+          outputDivRef.current.innerHTML = result.svg;
+        }
+        setLoading(false);
+        resolve();
+      }).catch((error: unknown) => {
+        console.error("Mermaid Render Error:", error);
+        setErrorMessage(`Error: ${error instanceof Error ? error.message : 'Invalid Mermaid syntax'}`);
+        setLoading(false);
+        resolve();
+      });
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Mermaid Init/Render Error:", error);
-    setErrorMessage(`Error: ${error.message || 'Invalid Mermaid syntax'}`);
+    setErrorMessage(`Error: ${error instanceof Error ? error.message : 'Invalid Mermaid syntax'}`);
     setLoading(false);
   }
 };
 
+interface ExportSvgParams {
+  outputDivRef: React.RefObject<HTMLDivElement>;
+  setErrorMessage: (message: string) => void;
+}
+
 /**
  * Exports the diagram as SVG
- * @param {Object} params - Parameters for export
- * @param {Object} params.outputDivRef - Reference to output div
- * @param {Function} params.setErrorMessage - Function to set error message
- * @returns {void}
  */
-export const exportSvg = ({ outputDivRef, setErrorMessage }) => {
-  const svgElement = outputDivRef.current?.querySelector('svg');
+export const exportSvg = ({ outputDivRef, setErrorMessage }: ExportSvgParams) => {
+  const svgElement = outputDivRef.current?.querySelector('svg') as SVGSVGElement | null;
 
   if (!svgElement) {
     setErrorMessage('No diagram to export. Please render a diagram first.');
@@ -63,43 +70,46 @@ export const exportSvg = ({ outputDivRef, setErrorMessage }) => {
 
 /**
  * Basic SVG Sanitizer: Removes foreignObject elements
- * @param {string} svgString - The SVG string to sanitize
- * @returns {string} - Sanitized SVG string
  */
-const sanitizeSvgString = (svgString) => {
+const sanitizeSvgString = (svgString: string): string => {
   // Remove <foreignObject>...</foreignObject> tags and their content
   // This is a common cause of canvas tainting
   return svgString.replace(/<foreignObject[\s\S]*?<\/foreignObject>/g, '');
 };
 
+interface ExportPngParams {
+  outputDivRef: React.RefObject<HTMLDivElement>;
+  setErrorMessage: (message: string) => void;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageScale?: number;
+}
+
 /**
  * Exports the diagram as PNG
- * @param {Object} params - Parameters for export
- * @param {Object} params.outputDivRef - Reference to output div
- * @param {Function} params.setErrorMessage - Function to set error message
- * @param {number} params.imageWidth - Desired width (used if SVG has no width)
- * @param {number} params.imageHeight - Desired height (used if SVG has no height)
- * @param {number} params.imageScale - Scale factor for the image
- * @returns {void}
  */
-export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeight, imageScale }) => {
+export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeight, imageScale }: ExportPngParams) => {
   if (!outputDivRef.current || !outputDivRef.current.querySelector('svg')) {
     setErrorMessage("Please render the diagram first before exporting.");
     return;
   }
   
   try {
-    setErrorMessage(null);
-    const svg = outputDivRef.current.querySelector('svg');
-    
+    setErrorMessage('');
+    const svg = outputDivRef.current.querySelector('svg') as SVGSVGElement | null;
+    if (!svg) {
+      setErrorMessage('Failed to access SVG element for export');
+      return;
+    }
     // Create a deep clone of the SVG to avoid modifying the original
-    const svgClone = svg.cloneNode(true);
+    const svgClone = svg.cloneNode(true) as HTMLElement;
     
     // Apply computed styles to all elements in the SVG clone
-    const allElements = svgClone.querySelectorAll('*');
-    allElements.forEach(element => {
+    const allElements = (svgClone as HTMLElement).querySelectorAll('*') as NodeListOf<HTMLElement>;
+    allElements.forEach((element: HTMLElement) => {
       if (element.nodeType === 1) { // Check if it's an element node
-        const computedStyle = window.getComputedStyle(svg.querySelector(`[id="${element.id}"]`) || element);
+        const htmlElement = element as HTMLElement;
+        const computedStyle = window.getComputedStyle(svg.querySelector(`[id="${element.id}"]`) || element as HTMLElement);
         const importantStyles = [
           'font-family', 'font-size', 'font-weight', 'fill', 'stroke', 
           'stroke-width', 'stroke-dasharray', 'opacity', 'text-anchor'
@@ -108,14 +118,14 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
         importantStyles.forEach(style => {
           const value = computedStyle.getPropertyValue(style);
           if (value && value !== '') {
-            element.style[style] = value;
+            htmlElement.style[style as any] = value;
           }
         });
       }
     });
     
     // Specifically handle text elements to ensure they render correctly
-    svgClone.querySelectorAll('text').forEach(textEl => {
+    (svgClone as HTMLElement).querySelectorAll('text').forEach((textEl: SVGTextElement) => {
       // Ensure text elements have font attributes
       if (!textEl.style.fontFamily && !textEl.getAttribute('font-family')) {
         textEl.setAttribute('font-family', 'Arial, Helvetica, sans-serif');
@@ -148,6 +158,10 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
     // Calculate dimensions - use the provided export settings
     // If SVG has dimensions, use them as a base, otherwise use the provided settings
     let svgWidth, svgHeight;
+    if (!svg) {
+      setErrorMessage('Failed to access SVG element for export');
+      return;
+    }
     const viewBox = svg.getAttribute('viewBox');
     if (viewBox) {
       const [, , vbWidth, vbHeight] = viewBox.split(' ').map(parseFloat);
@@ -159,20 +173,30 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
     }
     
     // Use the provided settings if available, otherwise use SVG dimensions
-    const targetWidth = Math.round((imageWidth || parseFloat(svgWidth)) * imageScale);
-    const targetHeight = Math.round((imageHeight || parseFloat(svgHeight)) * imageScale);
+    const safeImageScale = imageScale || 1; // Default scale if undefined
+    const svgWidthNum = typeof svgWidth === 'string' ? parseFloat(svgWidth) : svgWidth;
+    const svgHeightNum = typeof svgHeight === 'string' ? parseFloat(svgHeight) : svgHeight;
+    const targetWidth = Math.round((imageWidth || svgWidthNum) * safeImageScale);
+    const targetHeight = Math.round((imageHeight || svgHeightNum) * safeImageScale);
     
-    // Explicitly set width/height in the SVG
+    // Ensure numeric values are converted to strings for SVG attributes
+    const svgWidthStr = svgWidth ? svgWidth.toString() : '';
+    const svgHeightStr = svgHeight ? svgHeight.toString() : '';
+    
+    // Explicitly set width/height in the SVG with proper type conversion
+    const widthValue = imageWidth !== undefined ? String(imageWidth) : svgWidthStr;
+    const heightValue = imageHeight !== undefined ? String(imageHeight) : svgHeightStr;
+    
     if (svgData.includes('width=')) {
-      svgData = svgData.replace(/width="[^"]*"/, `width="${imageWidth || svgWidth}"`);
+      svgData = svgData.replace(/width="[^"]*"/, `width="${widthValue}"`);
     } else {
-      svgData = svgData.replace('<svg', `<svg width="${imageWidth || svgWidth}"`);
+      svgData = svgData.replace('<svg', `<svg width="${widthValue}"`);
     }
     
     if (svgData.includes('height=')) {
-      svgData = svgData.replace(/height="[^"]*"/, `height="${imageHeight || svgHeight}"`);
+      svgData = svgData.replace(/height="[^"]*"/, `height="${heightValue}"`);
     } else {
-      svgData = svgData.replace('<svg', `<svg height="${imageHeight || svgHeight}"`);
+      svgData = svgData.replace('<svg', `<svg height="${heightValue}"`);
     }
     
     // Use a data URL approach with proper encoding
@@ -186,7 +210,7 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
       const canvas = document.createElement('canvas');
       canvas.width = targetWidth;
       canvas.height = targetHeight;
-      const ctx = canvas.getContext('2d', { alpha: true });
+      const ctx = canvas.getContext('2d', { alpha: true })!;
       
       // Draw white background
       ctx.fillStyle = 'white';
@@ -211,19 +235,19 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      } catch (exportErr) {
+      } catch (exportErr: unknown) {
         console.error('PNG export error:', exportErr);
-        setErrorMessage("Failed to export PNG: " + exportErr.message);
+        setErrorMessage("Failed to export PNG: " + (exportErr instanceof Error ? exportErr.message : 'Unknown error'));
       }
     };
     
-    img.onerror = (err) => {
+    img.onerror = (err: unknown) => {
       console.error("Error loading SVG for PNG export:", err);
       setErrorMessage("Error exporting PNG. Could not load SVG image.");
     };
     
     img.src = svgUrl;
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to export PNG:', err);
     setErrorMessage('Failed to export PNG: ' + (err.message || 'Unknown error'));
   }
@@ -234,7 +258,7 @@ export const exportPng = ({ outputDivRef, setErrorMessage, imageWidth, imageHeig
  * @param {Blob} blob - The blob to download
  * @param {string} filename - The name of the file
  */
-export const downloadFile = (blob, filename) => {
+export const downloadFile = (blob: Blob, filename: string) => {
   const downloadLink = document.createElement('a');
   downloadLink.href = URL.createObjectURL(blob);
   downloadLink.download = filename;
@@ -252,8 +276,8 @@ export const downloadFile = (blob, filename) => {
  * @param {Function} params.setErrorMessage - Function to set error message
  * @returns {Promise<void>}
  */
-export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) => {
-  const svgElement = outputDivRef.current?.querySelector('svg');
+export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }: { outputDivRef: React.RefObject<HTMLDivElement>, setErrorMessage: (message: string) => void }) => {
+  const svgElement = outputDivRef.current?.querySelector('svg') as SVGSVGElement | null;
 
   if (!svgElement) {
     setErrorMessage('No diagram to copy. Please render a diagram first.');
@@ -266,10 +290,11 @@ export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) =>
     const svgClone = svgElement.cloneNode(true);
     
     // Apply computed styles to all elements in the SVG clone
-    const allElements = svgClone.querySelectorAll('*');
-    allElements.forEach(element => {
+    const allElements = (svgClone as HTMLElement).querySelectorAll('*') as NodeListOf<HTMLElement>;
+    allElements.forEach((element: HTMLElement) => {
       if (element.nodeType === 1) { // Check if it's an element node
-        const computedStyle = window.getComputedStyle(svgElement.querySelector(`[id="${element.id}"]`) || element);
+        const htmlElement = element as HTMLElement;
+        const computedStyle = window.getComputedStyle(svgElement.querySelector(`[id="${element.id}"]`) || element as HTMLElement);
         const importantStyles = [
           'font-family', 'font-size', 'font-weight', 'fill', 'stroke', 
           'stroke-width', 'stroke-dasharray', 'opacity', 'text-anchor'
@@ -278,14 +303,14 @@ export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) =>
         importantStyles.forEach(style => {
           const value = computedStyle.getPropertyValue(style);
           if (value && value !== '') {
-            element.style[style] = value;
+            htmlElement.style[style as any] = value;
           }
         });
       }
     });
     
     // Specifically handle text elements to ensure they render correctly
-    svgClone.querySelectorAll('text').forEach(textEl => {
+    (svgClone as HTMLElement).querySelectorAll('text').forEach((textEl: SVGTextElement) => {
       // Ensure text elements have font attributes
       if (!textEl.style.fontFamily && !textEl.getAttribute('font-family')) {
         textEl.setAttribute('font-family', 'Arial, Helvetica, sans-serif');
@@ -302,7 +327,7 @@ export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) =>
     });
 
     const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d', { alpha: true });
+    const ctx = canvas.getContext('2d', { alpha: true })!;
     const img = new Image();
 
     // Use higher resolution for copy
@@ -344,7 +369,7 @@ export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) =>
     // Use a data URL approach with proper encoding
     const svgUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
 
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       img.onload = () => {
         // Draw white background and scaled image
         ctx.fillStyle = 'white';
@@ -387,8 +412,8 @@ export const copyImageToClipboard = async ({ outputDivRef, setErrorMessage }) =>
 
       img.src = svgUrl;
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Copy to clipboard error:', error);
-    setErrorMessage(`Failed to copy diagram: ${error.message || 'Unknown error'}`);
+    setErrorMessage(`Failed to copy diagram: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
 import './App.css';
-import templates from './utils/mermaidTemplates.js';
+import templates from './utils/mermaidTemplates';
 import { SaltProvider } from '@salt-ds/core';
 import InputSection from './components/InputSection';
 import OutputSection from './components/OutputSection';
@@ -14,18 +14,18 @@ const App = () => {
   const [mermaidCode, setMermaidCode] = useState(templates.flowchart);
   const [selectedTemplate, setSelectedTemplate] = useState('flowchart');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // Use null for no error, string for error message
+  const [error, setError] = useState<string | undefined>(undefined); // Use undefined for no error, string for error message
   const [showDiagramPopup, setShowDiagramPopup] = useState(false);
   const [showEditorPopup, setShowEditorPopup] = useState(false);
   const [imageWidth, setImageWidth] = useState(800); // Default width
   const [imageHeight, setImageHeight] = useState(600); // Default height
   const [imageScale, setImageScale] = useState(1.5); // Default scale for PNG export
-  const [mode, setMode] = useState('light');
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
   const [diagramZoom, setDiagramZoom] = useState(1);
   const [tempMermaidCode, setTempMermaidCode] = useState(mermaidCode);
   const [previewSvgContent, setPreviewSvgContent] = useState(''); // State for SVG content in popup
 
-  const outputDivRef = useRef(null);
+  const outputDivRef = useRef<HTMLDivElement>(null!);
 
   // Initialize Mermaid on mode change
   useEffect(() => {
@@ -65,7 +65,7 @@ const App = () => {
   }, [mermaidCode]); // Rerun effect when mermaidCode changes
 
   // Handle template change
-  const handleTemplateChange = (templateKey) => {
+  const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
     setMermaidCode(templates[templateKey]);
     // Rendering will be handled by the useEffect above when mermaidCode changes
@@ -79,7 +79,7 @@ const App = () => {
     }
   
     setLoading(true);
-    setError(null); // Clear previous errors
+    setError(undefined); // Clear previous errors
     outputDivRef.current.innerHTML = ''; // Clear previous diagram
   
     try {
@@ -93,9 +93,10 @@ const App = () => {
       if (outputDivRef.current) { // Double-check ref is still valid
         outputDivRef.current.innerHTML = svg;
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      if (!(err instanceof Error)) return;
       console.error('Mermaid rendering error:', err);
-      const errorMessage = `Error rendering diagram: ${err.message || 'Invalid Mermaid syntax'}`;
+      const errorMessage = `Error rendering diagram: ${err instanceof Error ? err.message : 'Invalid Mermaid syntax'}`;
       setError(errorMessage);
       // Display error message directly in the output area
       if (outputDivRef.current) {
@@ -124,7 +125,7 @@ const App = () => {
 
   // --- Diagram Popup (Preview) Handlers ---
    const handleOpenDiagram = async () => {
-    setError(null); // Clear previous errors
+    setError(undefined); // Clear previous errors
 
     // Ensure the diagram exists in the main output area
     if (!outputDivRef.current?.querySelector('svg')) {
@@ -148,17 +149,8 @@ const App = () => {
     setDiagramZoom(1); // Reset zoom on close
   };
 
-  // --- Zoom Handlers for Diagram Popup ---
-  const handleZoomIn = () => {
-    setDiagramZoom(prevZoom => Math.min(prevZoom + 0.1, 3)); // Max zoom 3x
-  };
-
-  const handleZoomOut = () => {
-    setDiagramZoom(prevZoom => Math.max(prevZoom - 0.1, 0.1)); // Min zoom 0.1x
-  };
-
   // Update the handleZoomIn and handleZoomOut functions to accept a specific zoom level
-  const handleZoomChange = (newZoomLevel) => {
+  const handleZoomChange = (newZoomLevel: number) => {
     setDiagramZoom(newZoomLevel);
   };
 
@@ -195,7 +187,7 @@ const App = () => {
       }, 3000);
     } catch (error) {
       console.error('Failed to copy image:', error);
-      setError('Failed to copy image to clipboard: ' + error.message);  // Change this to use setError
+      setError('Failed to copy image to clipboard: ' + (error instanceof Error ? error.message : 'Unknown error'));  // Change this to use setError
       
       // Show error toast
       setToast({ show: true, message: 'Failed to copy image', type: 'error' });
@@ -262,8 +254,6 @@ const App = () => {
         {showDiagramPopup && (
           <DiagramPopup
             svgContent={previewSvgContent}
-            handleZoomIn={handleZoomIn}
-            handleZoomOut={handleZoomOut}
             handleZoomChange={handleZoomChange} // Add this new prop
             closeDiagramPopup={handleCloseDiagram}
             handleCopyImage={handleCopyImageClick}

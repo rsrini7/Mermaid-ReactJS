@@ -1,10 +1,15 @@
 import React from 'react';
 
-const Header = ({ theme, handleThemeToggle, handleTemplateChange }) => {
+interface HeaderProps {
+  theme: string;
+  handleThemeToggle: () => void;
+  handleTemplateChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ theme, handleThemeToggle, handleTemplateChange }) => {
   return (
     <>
       <h1>Mermaid Diagram Generator</h1>
-
       <div className="controls">
         <div className="template-section">
           <label htmlFor="template-select">Select Template: </label>
@@ -57,7 +62,6 @@ const Header = ({ theme, handleThemeToggle, handleTemplateChange }) => {
             </optgroup>
           </select>
         </div>
-        
         <div className="theme-toggle">
           <span className="theme-icon">☀️</span>
           <label className="switch">

@@ -1,9 +1,16 @@
 import React, { useEffect } from 'react';
 
-const EditorPopup = ({ mermaidCode, setMermaidCode, onSave, onClose }) => {
+interface EditorPopupProps {
+  mermaidCode: string;
+  setMermaidCode: (code: string) => void;
+  onSave: () => void;
+  onClose: () => void;
+}
+
+const EditorPopup: React.FC<EditorPopupProps> = ({ mermaidCode, setMermaidCode, onSave, onClose }) => {
   // Add event listener for Escape key
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
       }

@@ -28,15 +28,15 @@
     ]
   },
   "dependencies": {
+    "@salt-ds/core": "^1.22.0",
+    "@salt-ds/icons": "^1.9.0",
+    "@salt-ds/lab": "^1.0.0-alpha.35",
+    "@salt-ds/theme": "^1.13.0",
     "@tanstack/react-router": "^1.114.3",
     "@tanstack/react-router-devtools": "^1.114.3",
     "mermaid": "^11.5.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@salt-ds/core": "^1.22.0",
-    "@salt-ds/theme": "^1.13.0",
-    "@salt-ds/icons": "^1.9.0",
-    "@salt-ds/lab": "^1.0.0-alpha.35"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.9",
@@ -59,6 +59,7 @@
     "jsdom": "^26.0.0",
     "serve": "^14.2.1",
     "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.2",
     "typescript": "^5.7.2",
     "url-loader": "^4.1.1",
     "vitest": "^3.0.9",

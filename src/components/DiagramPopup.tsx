@@ -1,11 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPopup, handleCopyImage, zoomLevel }) => {
-  const previewDivRef = useRef(null); // Local ref for the preview div
-  const previewContainerRef = useRef(null); // Ref for the inner container that will be scaled
+interface DiagramPopupProps {
+  svgContent: string;
+  handleZoomChange: (newZoomLevel: number) => void;
+  closeDiagramPopup: () => void;
+  handleCopyImage: () => void;
+  zoomLevel: number;
+}
+
+const DiagramPopup: React.FC<DiagramPopupProps> = ({ svgContent, closeDiagramPopup, handleCopyImage, zoomLevel }) => {
+  const previewDivRef = useRef<HTMLDivElement>(null); // Local ref for the preview div
+  const previewContainerRef = useRef<HTMLDivElement>(null); // Ref for the inner container that will be scaled
   
   // Add state to track slider value
-  const [sliderValue, setSliderValue] = useState(zoomLevel * 100);
+  const [sliderValue, setSliderValue] = useState<number>(zoomLevel * 100);
 
   // Effect to update the preview content when svgContent changes or component mounts
   useEffect(() => {
@@ -43,28 +51,22 @@ const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPop
 
   // Add event listener for Escape key
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         closeDiagramPopup();
       }
     };
-
     document.addEventListener('keydown', handleKeyDown);
-    
-    // Clean up the event listener when component unmounts
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [closeDiagramPopup]);
 
   // Handle slider change
-  const handleSliderChange = (e) => {
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value, 10);
     setSliderValue(newValue);
-    // Calculate the new zoom level (between 0.1 and 3)
     const newZoomLevel = newValue / 100;
-    
-    // Update the container with the new zoom level
     if (previewContainerRef.current) {
       previewContainerRef.current.style.transform = `scale(${newZoomLevel})`;
     }
@@ -97,11 +99,8 @@ const DiagramPopup = ({ svgContent, handleZoomIn, handleZoomOut, closeDiagramPop
             </div>
           </div>
         </div>
-        {/* The outer div handles scrolling */}
         <div className="diagram-preview" ref={previewDivRef}>
-          {/* The inner container handles zoom transformation */}
           <div className="diagram-preview-container" ref={previewContainerRef}>
-            {/* Content is set via useEffect */}
           </div>
         </div>
       </div>

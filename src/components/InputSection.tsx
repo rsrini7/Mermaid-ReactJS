@@ -1,14 +1,30 @@
 import React from 'react';
-import ExportSettings from './ExportSettings';
-import { Dropdown } from '@salt-ds/core';
 
-const InputSection = ({
+interface InputSectionProps {
+  mermaidCode: string;
+  setMermaidCode: (code: string) => void;
+  renderDiagram: () => void;
+  handleOpenEditor: () => void;
+  loading: boolean;
+  errorMessage?: string;
+  imageWidth: number;
+  setImageWidth: (width: number) => void;
+  imageHeight: number;
+  setImageHeight: (height: number) => void;
+  imageScale: number;
+  setImageScale: (scale: number) => void;
+  templates: Record<string, unknown>;
+  selectedTemplate: string;
+  onTemplateChange: (template: string) => void;
+}
+
+const InputSection: React.FC<InputSectionProps> = ({
   mermaidCode,
   setMermaidCode,
   renderDiagram,
   handleOpenEditor,
   loading,
-  errorMessage, // Receive errorMessage prop
+  errorMessage,
   imageWidth,
   setImageWidth,
   imageHeight,

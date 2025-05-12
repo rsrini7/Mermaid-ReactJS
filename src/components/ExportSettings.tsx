@@ -1,6 +1,15 @@
 import React from 'react';
 
-const ExportSettings = ({ 
+interface ExportSettingsProps {
+  imageWidth: number;
+  setImageWidth: (width: number) => void;
+  imageHeight: number;
+  setImageHeight: (height: number) => void;
+  imageScale: number;
+  setImageScale: (scale: number) => void;
+}
+
+const ExportSettings: React.FC<ExportSettingsProps> = ({ 
   imageWidth,
   setImageWidth,
   imageHeight,
